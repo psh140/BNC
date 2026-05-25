@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bnc.mapper.ChartMapper">
+	<select id="readProjFlag" resultType="com.bnc.domain.ChartVO">
+		select 
+			count(decode(p.proj_flag, 'W', 1)) as proj_flag_w,
+			count(decode(p.proj_flag, 'C', 1)) as proj_flag_C,
+			count(decode(p.proj_flag, 'P', 1)) as proj_flag_P,
+			count(decode(p.proj_flag, 'E', 1)) as proj_flag_E
+		from bnc_project p
+	</select>
+	
+	<select id="readForMonthMember" resultType="com.bnc.domain.ChartVO">
+		<![CDATA[
+		SELECT rdate as memb_rdate, NVL(cnt, 0) cnt FROM (
+		            SELECT rdate FROM (
+		                SELECT TO_CHAR(TO_DATE(#{criteriaMonth}, 'YYYYMM') + LEVEL - 1, 'YYYYMM') AS rdate
+		                FROM DUAL CONNECT BY LEVEL <= TO_DATE(#{curMonth}, 'YYYYMM') - TO_DATE(#{criteriaMonth}, 'YYYYMM') + 1
+		            ) 
+		            group by rdate
+		            ) dt
+		            left join
+		            (
+		                SELECT SUBSTR(memb_rdate,1,6) as mrdate, COUNT(*) as cnt FROM bnc_member
+		                where memb_rdate >= #{criteriaMonth}
+		                group by SUBSTR(memb_rdate,1,6)
+		            ) mc
+		            on dt.rdate = mc.mrdate
+		            ORDER BY rdate DESC
+		]]>
+	</select>
+	
+	<select id="topReqCompanyRead" resultType="com.bnc.domain.ChartVO">
+	<![CDATA[	
+		select * from (
+    		select rownum as rn, list.* from (
+        		select p.proj_req_biznum, cm.cmpy_company_name, count(*) as cnt, sum(ct.cntr_price) as totalPrice
+		            from bnc_project p, bnc_contract ct, bnc_company cm
+		            where proj_flag = 'E' and not p.proj_req_biznum is null and p.proj_number = ct.cntr_proj_number and p.proj_req_biznum = cm.cmpy_biznum
+		            group by p.proj_req_biznum, cm.cmpy_company_name
+		            order by count(*) desc
+        ) list 
+    ) where rn > 0 and rn <= 1
+    ]]>
+	</select>
+	
+	<select id="topAcpCompanyRead" resultType="com.bnc.domain.ChartVO">
+	<![CDATA[
+		select * from (
+		    select rownum as rn, list.* from (
+		        select p.proj_acp_biznum, cm.cmpy_company_name, count(p.proj_number) as cnt, sum(ct.cntr_price) as totalPrice
+		            from bnc_project p, bnc_contract ct, bnc_company cm
+		            where proj_flag = 'E' and not proj_acp_biznum is null and p.proj_number = ct.cntr_proj_number and p.proj_acp_biznum = cm.cmpy_biznum
+		            group by p.proj_acp_biznum, cm.cmpy_company_name
+		            order by count(*) desc
+        ) list 
+    ) where rn > 0 and rn <= 1
+	]]>
+	</select>
+	
+	<select id="endProjectAvgPrice" resultType="int">
+	<![CDATA[
+		select round(avg(c.cntr_price)) as avg from bnc_contract c, bnc_project p
+    		where p.proj_flag = 'E' and c.cntr_proj_number = p.proj_number
+    ]]>
+	</select>
+	
+	<select id="projectKindCount" resultType="int">
+		select count(proj_kind) as cnt 
+			from bnc_project 
+			where proj_kind = #{proj_kind}
+	</select>
+	
+	<select id="totalMemberCount" resultType="int">
+		<![CDATA[
+		select count(*) as cnt from bnc_member
+		]]>
+	</select>
+	
+	<select id="totalCompanyCount" resultType="int">
+		<![CDATA[
+		select count(*) as cnt from bnc_company
+		]]>
+	</select>
+	
+	<select id="topProjectPriceInfo" resultType="com.bnc.domain.ChartVO">
+	<![CDATA[
+		select * from (
+		    select rownum as rn, list.* from (
+			    select p.proj_number, p.proj_name, p.proj_req_biznum, p.proj_acp_biznum, c.cntr_price 
+			    from bnc_project p, bnc_contract c 
+			    where p.proj_number = c.cntr_proj_number and cntr_flag = 'Y' 
+			    order by c.cntr_price desc
+	    ) list
+	    )where rn > 0 and rn <= 1
+    ]]>
+	</select>
+	
+	<select id="endProjectPriceTotal" resultType="int">
+	<![CDATA[
+		select sum(cntr_price) total 
+		    from bnc_project p, bnc_contract c 
+		    where p.proj_number = c.cntr_proj_number and c.cntr_flag = 'Y'
+	]]>
+	</select>
+</mapper>

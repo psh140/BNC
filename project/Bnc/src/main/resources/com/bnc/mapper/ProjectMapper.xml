@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bnc.mapper.ProjectMapper">
+
+	<select id="selectMyProjectListCount" parameterType="hashmap" resultType="int">
+		<![CDATA[
+		SELECT count(*) FROM bnc_project
+		WHERE (proj_req_biznum = #{companyData.cmpy_biznum} OR proj_acp_biznum = #{companyData.cmpy_biznum})
+		]]> 
+		<choose>
+			<when test="pageData.searchType != null and pageData.searchType !='' ">
+			AND ${pageData.searchType} like '%'||#{pageData.searchKeyword}||'%'
+			</when>
+		</choose>
+	</select>
+	
+	<select id="selectMyProjectList" parameterType="hashmap" resultType="com.bnc.domain.ProjectVO">
+		<![CDATA[
+		SELECT * FROM (
+			SELECT ROWNUM AS RNUM, list.* FROM (
+				SELECT * FROM bnc_project
+				WHERE (proj_req_biznum = #{companyData.cmpy_biznum} OR proj_acp_biznum = #{companyData.cmpy_biznum})
+		]]>
+			<choose>
+				<when test="pageData.searchType != null and pageData.searchType !='' ">
+					AND ${pageData.searchType} like '%'||#{pageData.searchKeyword}||'%'
+	         	</when>
+			</choose>
+				order by proj_number DESC
+		<![CDATA[
+			) list
+		)
+		]]>
+      
+		<![CDATA[
+		WHERE RNUM > #{pageData.startRowNumber} AND RNUM <= #{pageData.endRowNumber}
+		]]>
+	</select>
+	
+	<select id="selectProjectListCount" resultType="int">
+		<![CDATA[
+		SELECT count(*) FROM bnc_project
+		]]> 
+		<choose>
+			<when test="searchType != null and searchType !='' ">
+			WHERE bnc_project.${searchType} like '%'||#{searchKeyword}||'%'
+			</when>
+		</choose>
+	</select>
+	
+	<select id="selectProjectList" resultType="com.bnc.domain.ProjectVO">
+		<![CDATA[
+		SELECT * FROM (
+			SELECT ROWNUM AS RNUM, list.* FROM (
+				SELECT * FROM bnc_project project 
+		]]>
+			<choose>
+				<when test="searchType != null and searchType !='' ">
+					WHERE project.${searchType} like '%'||#{searchKeyword}||'%'
+	         	</when>
+			</choose>
+				order by proj_number DESC
+		<![CDATA[
+			) list
+		)
+		]]>
+      
+		<![CDATA[
+		WHERE RNUM > #{startRowNumber} AND RNUM <= #{endRowNumber}
+		]]>
+	</select>
+	
+	<update id="updateProjectMatching">
+		UPDATE bnc_project
+		SET
+				proj_acp_phone 	= #{prpl_acp_phone},
+				proj_acp_biznum = #{prpl_acp_biznum},
+				proj_flag		= 'C'
+		WHERE 	proj_number 	= #{prpl_number}
+	</update>
+	
+	<update id="updateProjectFlag">
+		UPDATE bnc_project
+		SET
+				proj_flag		= #{proj_flag}
+		WHERE 	proj_number 	= #{proj_number}
+	</update>
+	
+	<select id="selectProjectParticipateData" resultType="com.bnc.domain.ProjectParticipateVO">
+		SELECT * FROM
+			bnc_project_participate_list  
+		WHERE prpl_number 	= #{prpl_number}
+		AND prpl_acp_biznum = #{prpl_acp_biznum}
+	</select>
+	
+	<select id="selectProjectParticipateList" resultType="com.bnc.domain.ProjectParticipateVO">
+		SELECT * FROM
+			bnc_project_participate_list pplist, bnc_company company  
+		WHERE pplist.prpl_acp_biznum = company.cmpy_biznum
+		AND pplist.prpl_number = #{projectNumber}
+	</select>
+	
+	<select id="selectProjectParticipateCheckCount" resultType="int">
+		SELECT COUNT(*) FROM
+			bnc_project_participate_list
+		WHERE prpl_number 		= #{prpl_number}
+		AND prpl_acp_biznum 	= #{prpl_acp_biznum}
+	</select>
+	
+	<insert id="insertProjectParticipateData">
+		INSERT INTO bnc_project_participate_list
+		(
+			prpl_number,
+			prpl_acp_biznum,
+			prpl_acp_price,
+			prpl_acp_phone,
+			prpl_file_path,
+			prpl_file_name,
+			prpl_rdate
+		)
+		VALUES(
+			#{prpl_number},
+			#{prpl_acp_biznum},
+			#{prpl_acp_price},
+			#{prpl_acp_phone},
+			#{prpl_file_path, 	jdbcType=VARCHAR},
+			#{prpl_file_name, 	jdbcType=VARCHAR},
+			TO_CHAR(sysdate, 'YYYYMMDDHHmmss')
+		)
+	</insert>
+	
+	<select id="selectProjectView" resultType="com.bnc.domain.ProjectVO">
+		SELECT * FROM 
+			bnc_company company, 
+			bnc_project project
+		WHERE 
+			company.cmpy_biznum = project.proj_req_biznum
+		AND project.proj_number = #{projectNumber}
+	</select>
+	
+	<update id="updateProjectData">
+		UPDATE bnc_project
+		
+		SET
+			<if test="proj_name != null">proj_name = #{proj_name, 	jdbcType=VARCHAR},</if>
+			<if test="proj_kind != null">proj_kind = #{proj_kind, 	jdbcType=VARCHAR},</if>
+			<if test="proj_req_phone != null">proj_req_phone = #{proj_req_phone, 	jdbcType=VARCHAR},</if>
+			<if test="proj_acp_phone != null">proj_acp_phone = #{proj_acp_phone, 	jdbcType=VARCHAR},</if>
+			<if test="proj_acp_biznum != null">proj_acp_biznum = #{proj_acp_biznum, 	jdbcType=VARCHAR},</if>
+			<if test="proj_mov_url != null">proj_mov_url = #{proj_mov_url, 	jdbcType=VARCHAR},</if>
+			<if test="proj_keyword != null">proj_keyword = #{proj_keyword, 	jdbcType=VARCHAR},</if>
+			<if test="proj_lead_time != null">proj_lead_time = #{proj_lead_time, 	jdbcType=VARCHAR},</if>
+			<if test="proj_flag != null">proj_flag = #{proj_flag, 	jdbcType=VARCHAR},</if>
+			<if test="proj_price_range != null">proj_price_range = #{proj_price_range, 	jdbcType=VARCHAR},</if>
+			<if test="proj_thumb_file_path != null">proj_thumb_file_path = #{proj_thumb_file_path, 	jdbcType=VARCHAR},</if>
+			<if test="proj_contents != null">proj_contents = #{proj_contents, 	jdbcType=VARCHAR},</if>
+			<if test="proj_req_flag != null">proj_req_flag = #{proj_req_flag, 	jdbcType=VARCHAR},</if>
+			<if test="proj_acp_flag != null">proj_acp_flag = #{proj_acp_flag, 	jdbcType=VARCHAR},</if>
+
+			proj_udate 			= TO_CHAR(sysdate, 'YYYYMMDDHHmmss') 
+
+		where proj_number = #{proj_number}
+	</update>
+	
+	<insert id="insertProjectData">
+		<selectKey keyProperty="proj_number" resultType="int" order="BEFORE">
+			select bnc_project_seq.nextval from dual
+		</selectKey>
+		insert into BNC_PROJECT
+		(
+			proj_number, 
+			proj_name, 
+			proj_kind, 
+			proj_req_phone,
+			proj_req_biznum,
+			proj_acp_phone,
+			proj_acp_biznum,
+			proj_mov_url,
+			proj_keyword,
+			proj_lead_time,
+			proj_flag,
+			proj_price_range,
+			proj_thumb_file_path,
+			proj_contents,
+			proj_rdate,
+			proj_udate
+		)
+		values
+		(
+			#{proj_number},
+			#{proj_name},
+			#{proj_kind},
+			#{proj_req_phone},
+			#{proj_req_biznum},
+			#{proj_acp_phone, 	jdbcType=VARCHAR},
+			#{proj_acp_biznum, 	jdbcType=VARCHAR},
+			#{proj_mov_url, 	jdbcType=VARCHAR},
+			#{proj_keyword, 	jdbcType=VARCHAR},
+			#{proj_lead_time, 	jdbcType=VARCHAR},
+			'W',
+			#{proj_price_range},
+			#{proj_thumb_file_path, jdbcType=VARCHAR},
+			#{proj_contents},
+			TO_CHAR(sysdate, 'YYYYMMDDHHmmss'),
+			TO_CHAR(sysdate, 'YYYYMMDDHHmmss')
+		)
+	</insert>
+	
+	
+	<!-- 파일 인서트 -->
+	<insert id="insertProjectFiles">
+		insert into bnc_project_file
+		(prof_seq, prof_proj_number, prof_file_path, prof_file_name)
+		values(bnc_project_file_seq.nextval, #{prof_proj_number}, #{prof_file_path}, #{prof_file_name})
+	</insert>
+	
+	
+	<update id="updateProjectWorkingFlag">
+		UPDATE bnc_project
+		<choose>
+			<when test="authCheck != null and authCheck =='req' ">
+				SET proj_req_flag	= #{proj_req_flag}
+	       	</when>
+	       	<when test="authCheck != null and authCheck =='acp' ">
+				SET proj_acp_flag	= #{proj_acp_flag}
+	       	</when>
+		</choose>
+		WHERE 	proj_number 	= #{proj_number}
+	</update>
+
+	<select id="selectProjectFiles" resultType="com.bnc.domain.ProjectFileDTO">
+		select * from bnc_project_file
+		where prof_proj_number = #{projectNumber}
+		order by prof_seq asc
+	</select>	
+	
+	<select id="projectCount" resultType="int">
+		select count(*) from bnc_project
+	</select>
+	
+	<!-- 프로젝트 신청 기업 삭제 -->
+	<delete id="deleteProjectParticipateData">
+		delete from bnc_project_participate_list
+		WHERE prpl_number = #{proj_number}
+	</delete>
+	
+	<!-- 프로젝트 삭제 -->
+	<delete id="deleleProject">
+		delete from bnc_project
+		where proj_number = #{proj_number}
+	</delete>
+	
+	<!-- 프로젝트 파일 전체 삭제 -->
+	<delete id="deleteProjectFile">
+		delete from bnc_project_file
+		where prof_proj_number = #{proj_number}
+	</delete>
+	
+	<!-- 프로젝트 파일 선택 삭제 -->
+	<delete id="deleteProjectFilesNotIn" parameterType="java.util.HashMap">
+		DELETE FROM bnc_project_file
+		WHERE prof_seq NOT IN
+		<foreach collection="prof_files" item="item" index="index" separator="," open="(" close=")">
+        #{item}
+		</foreach>
+		AND prof_proj_number = #{proj_number}
+	</delete>
+	
+</mapper>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bnc.mapper.DocumentMapper">
+
+	<select id="selectDocumentListCount" resultType="int">
+		<![CDATA[
+		SELECT count(*) FROM bnc_document
+		]]> 
+			<choose>
+	         <when test="searchType != null and searchType !='' ">
+	         WHERE bnc_document.${searchType} like '%'||#{searchKeyword}||'%'
+	         </when>
+	      </choose>
+	</select>
+	
+	<!-- Document List -->
+	<select id="selectDocumentList" resultType="com.bnc.domain.DocumentVO">
+      <![CDATA[
+      SELECT * FROM (
+         SELECT ROWNUM AS RNUM, list.* FROM (
+            SELECT * FROM bnc_document document 
+      ]]>
+	      <choose>
+	         <when test="searchType != null and searchType !='' ">
+	         WHERE document.${searchType} like '%'||#{searchKeyword}||'%'
+	         </when>
+	      </choose>
+	      order by doct_code DESC
+      <![CDATA[
+         ) list
+      )
+      ]]>
+      
+      <![CDATA[
+      WHERE RNUM > #{startRowNumber} AND RNUM <= #{endRowNumber}
+      ]]>
+   </select>
+
+
+	<!-- Document View -->
+	<select id="read" resultType="com.bnc.domain.DocumentVO">
+		SELECT * FROM bnc_document WHERE doct_code = #{doct_code}
+	</select>
+	
+	<!-- Document write -->
+	<insert id="write">
+		insert into bnc_document
+				values( 
+				BNC_DOCUMENT_SEQ.nextval, 
+				#{doct_name},
+				#{doct_form}
+				)
+	</insert>
+	
+	<!-- Document modify -->
+	<update id="modify">
+		update bnc_document set 
+			doct_code = #{doct_code}, 
+			doct_name = #{doct_name}, 
+			doct_form = #{doct_form}
+			WHERE doct_code = #{doct_code}
+	</update>
+	
+	<!-- Document Delete -->
+	<delete id="delete">
+		DELETE FROM bnc_document WHERE doct_code = #{doct_code} 
+	</delete>
+</mapper>

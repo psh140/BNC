@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bnc.mapper.CompanyMapper">
+	<select id="selectMyCompanyData" resultType="com.bnc.domain.CompanyVO">
+		SELECT * FROM bnc_company
+		WHERE cmpy_memb_id = #{memb_id}
+	</select>
+
+	<!-- Company List Count, 기업정보 카운팅 -->
+	<select id="selectCompanyListCount" resultType="int">
+		<![CDATA[
+			SELECT count(*) FROM bnc_company company, bnc_biz_category cate
+			WHERE company.cmpy_biz_code = cate.bizc_code
+		]]>
+			<choose>
+				<when test="searchType != null and searchType !='' ">
+				 AND cate.${searchType} like '%'||#{searchKeyword}||'%'
+				</when>				
+			</choose>	
+	</select>
+	
+	<!-- Company List, 기업정보 전체 리스트 -->
+	<select id="selectCompanyList" resultType="com.bnc.domain.CompanyVO">
+		<![CDATA[
+		  SELECT * FROM (
+		  	SELECT ROWNUM AS RNUM, list.* FROM (
+		  		SELECT * FROM bnc_company company, bnc_biz_category cate
+		  		WHERE company.cmpy_biz_code = cate.bizc_code
+		]]>
+			<choose>
+			  <when test="searchType != null and searchType !='' ">
+			   AND cate.${searchType} like '%'||#{searchKeyword}||'%'
+			  </when>
+			</choose>
+		<![CDATA[
+			) list
+		)	
+		]]>
+		
+		<![CDATA[
+		 WHERE RNUM > #{startRowNumber} AND RNUM <= #{endRowNumber}		 
+		]]>	
+	</select>
+	
+	<select id="getList" resultType="com.bnc.domain.CompanyVO">
+		SELECT * FROM bnc_company order by cmpy_rdate desc
+	</select>
+	
+	<select id="getTotalCount" resultType="int">
+		SELECT count(cmpy_biznum) FROM bnc_company
+	</select>
+	
+	<!-- Company View, 기업정보 상세보기 -->
+	<select id="read" resultType="com.bnc.domain.CompanyVO">
+		SELECT * FROM bnc_company c, bnc_biz_category b WHERE c.cmpy_biz_code = b.bizc_code and cmpy_biznum = #{cmpy_biznum}
+	</select>	
+	
+	
+	<select id="selectCompanyData" resultType="com.bnc.domain.CompanyVO"  parameterType="java.util.HashMap">
+		SELECT * FROM bnc_company
+		WHERE cmpy_biznum IN
+		<foreach collection="company_list" item="item" index="index" separator="," open="(" close=")">
+        #{item}
+		</foreach>
+	</select>
+</mapper>

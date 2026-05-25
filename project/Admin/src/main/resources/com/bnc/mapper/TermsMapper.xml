@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bnc.mapper.TermsMapper">
+
+ 	<resultMap type="com.bnc.domain.TermsVO" id="TermsVO">
+		<result property="pol_contents" column="pol_contents" jdbcType="VARCHAR" javaType="java.lang.String"/>
+	</resultMap>
+	<!-- Terms Read -->
+	<select id="read" resultMap="TermsVO">
+		SELECT pol_kind, pol_rdate, pol_udate, pol_contents FROM bnc_terms WHERE pol_kind = #{pol_kind}
+	</select>
+	
+	<!-- Terms Modify -->
+	<update id="modify">
+		update bnc_terms set 
+			pol_udate = TO_CHAR(sysdate, 'YYYYMMDDHHmmss'),
+			pol_contents = #{pol_contents}
+			WHERE pol_kind = #{pol_kind}
+	</update>
+</mapper>

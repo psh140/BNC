@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bnc.mapper.NoticeMapper">
+
+	<!-- Notice List Count -->
+	<select id="selectNoticeListCount" resultType="int">
+		<![CDATA[
+		SELECT count(*) FROM bnc_notice
+		]]> 
+			<choose>
+	         <when test="searchType != null and searchType !='' ">
+	         WHERE bnc_notice.${searchType} like '%'||#{searchKeyword}||'%'
+	         </when>
+	      </choose>
+	</select>
+	
+	
+	<!-- Notice List -->
+	<select id="selectNoticeList" resultType="com.bnc.domain.NoticeVO">
+      <![CDATA[
+      SELECT * FROM (
+         SELECT ROWNUM AS RNUM, list.* FROM (
+            SELECT * FROM bnc_notice notice 
+      ]]>
+	      <choose>
+	         <when test="searchType != null and searchType !='' ">
+	         WHERE notice.${searchType} like '%'||#{searchKeyword}||'%'
+	         </when>
+	      </choose>
+	      order by notc_number DESC
+      <![CDATA[
+         ) list
+      )
+      ]]>
+      
+      <![CDATA[
+      WHERE RNUM > #{startRowNumber} AND RNUM <= #{endRowNumber}
+      ]]>
+   </select>
+	
+	
+	<!-- Notice View -->
+	<select id="read" resultType="com.bnc.domain.NoticeVO">
+		SELECT * FROM bnc_notice WHERE notc_number = #{notc_number}
+	</select>
+	
+	
+	<!-- Notice write -->
+	<insert id="write">
+		insert into bnc_notice (
+				notc_number, 
+				notc_admin_id,
+				notc_title,
+				notc_rdate,
+				notc_udate,
+				notc_contents
+				)
+				values( 
+				bnc_notice_seq.nextval, 
+				#{notc_admin_id}, 
+				#{notc_title},
+				TO_CHAR(sysdate, 'YYYYMMDDHHmmss'),
+				TO_CHAR(sysdate, 'YYYYMMDDHHmmss'),
+				#{notc_contents}
+				)
+	</insert>
+	
+	
+	<!-- Notice modify -->
+	<update id="modify">
+		update bnc_notice set 
+			notc_title = #{notc_title}, 
+			notc_udate = TO_CHAR(sysdate, 'YYYYMMDDHHmmss'), 
+			notc_contents = #{notc_contents}
+			WHERE notc_number = #{notc_number}
+	</update>
+	
+	
+	<!-- Notice Delete -->
+	<delete id="delete">
+		DELETE FROM bnc_notice WHERE notc_number = #{notc_number} 
+	</delete>
+</mapper>
