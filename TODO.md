@@ -113,3 +113,15 @@
 - Bnc(사용자앱): 포트 8080 / Admin(관리자): 포트 8081 → Nginx가 앞단에서 라우팅
 - 도메인 없이 EC2 IP로도 동작 가능 (HTTPS는 도메인 확보 후 추가)
 - `.env` 파일은 절대 git에 올리지 말 것
+
+---
+
+## README 작성용 메모 — Oracle → PostgreSQL 전환 이유
+
+> 프로젝트 완성 후 README에 옮길 것
+
+1. **라이선스/비용** — Oracle은 상용 라이선스. PostgreSQL은 완전 무료 오픈소스.
+2. **Docker 이미지 크기** — Oracle XE ~2GB vs PostgreSQL ~200MB. EC2 소형 인스턴스에서 Tomcat 2개 + Nginx와 함께 실행해야 하므로 메모리 부담이 큼.
+3. **Maven 의존성** — ojdbc6이 Maven Central에 없어 별도 리포지토리 설정 필요. PostgreSQL은 의존성 한 줄로 해결.
+4. **클라우드 친화성** — AWS RDS 등 클라우드 서비스에서 네이티브 지원. 현업 채택률도 높음.
+5. **쿼리 변환 최소화** — Oracle 전용 문법(sysdate, ROWNUM, CONNECT BY 등)만 표준 SQL로 교체. 비즈니스 로직은 그대로 유지.
