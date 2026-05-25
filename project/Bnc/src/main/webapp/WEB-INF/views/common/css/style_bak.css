@@ -1,0 +1,207 @@
+@charset "utf-8";
+
+@font-face {
+  font-family: 'Nanum Barun Gothic', sans-serif;
+  font-style: normal;
+  font-weight: 200;
+  src: url(../font/NanumBarunGothicUltraLight.eot);
+  src: local('Nanum Barun Gothic UltraLight'),
+       local('NanumBarunGothicUltraLight'),
+       url(../font/NanumBarunGothicUltraLight.eot?#iefix) format('embedded-opentype'),
+       url(../font/NanumBarunGothicUltraLight.woff2) format('woff2'),
+       url(../font/NanumBarunGothicUltraLight.woff) format('woff'),
+       url(../font/NanumBarunGothicUltraLight.ttf) format('truetype');
+}
+
+@font-face {
+  font-family: 'Nanum Barun Gothic', sans-serif;
+  font-style: normal;
+  font-weight: 300;
+  src: url(../font/NanumBarunGothicLight.eot);
+  src: local('Nanum Barun Gothic Light'),
+       local('NanumBarunGothicLight'),
+       url(../font/NanumBarunGothicLight.eot?#iefix) format('embedded-opentype'),
+       url(../font/NanumBarunGothicLight.woff2) format('woff2'),
+       url(../font/NanumBarunGothicLight.woff) format('woff'),
+       url(../font/NanumBarunGothicLight.ttf) format('truetype');
+}
+
+@font-face {
+  font-family: 'Nanum Barun Gothic', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  src: url(../font/NanumBarunGothic.eot);
+  src: local('Nanum Barun Gothic'),
+       local('NanumBarunGothic'),
+       url(../font/NanumBarunGothic.eot?#iefix) format('embedded-opentype'),
+       url(../font/NanumBarunGothic.woff2) format('woff2'),
+       url(../font/NanumBarunGothic.woff) format('woff'),
+       url(../font/NanumBarunGothic.ttf) format('truetype');
+}
+
+@font-face {
+  font-family: 'Nanum Barun Gothic', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  src: url(../font/NanumBarunGothicBold.eot);
+  src: local('Nanum Barun Gothic Bold'),
+       local('NanumBarunGothicBold'),
+       url(../font/NanumBarunGothicBold.eot?#iefix) format('embedded-opentype'),
+       url(../font/NanumBarunGothicBold.woff2) format('woff2'),
+       url(../font/NanumBarunGothicBold.woff) format('woff'),
+       url(../font/NanumBarunGothicBold.ttf) format('truetype');
+}
+
+img{border:0;}
+*{margin:0; padding:0;}
+li {list-style:none;}
+a{text-decoration:none; outline:none; color:#1e1e1e; font-family: NanumBarunGothic, sans-serif; font-size:14px;}
+a:visited{text-decoration:none;}
+a:link {text-decoration:none}
+input{outline:none;}
+html, body { height: 100%; width: 100%;}
+body{ margin:0; font-family: NanumBarunGothic, sans-serif; letter-spacing: -0.02em;}
+
+
+.scroll-wrapper{
+	width:100%;
+	height:100%;
+}
+.scroll-wrapper.scrollbar-inner {
+    max-height: none;
+}
+/* 위에 부분은 건드리지 말것 */
+
+/* table 공통 */
+table{border-spacing:0; width:100%; border:0; border-top:1px solid #e0e0e0; border-bottom:1px solid #e0e0e0; font-size:12px;}
+thead{background-color:#f5f5f5; width:100%;}
+thead>tr>th{height:46px; text-align:center; font-size:14px;}
+tbody>tr>td{height:64px; text-align:center; font-size:14px; color:#424242;}
+.board-list>tbody>tr>td{border-bottom:1px solid #f5f5f5;}
+.board-write>tbody>tr{border-bottom:1px solid #f5f5f5;}
+.board-write>tbody>tr>th{background-color:#f5f5f5;}
+
+
+/*랩, 컨테이너, 푸터, 헤더 */
+#wrap{ width: 100%; min-width:1200px; height:auto; overflow:hidden;}
+#footer{width:100%; height:180px; background-color:#000000; position: fixed; bottom: 0px;}
+.container{width:100%; min-width:1200px; overflow:hidden; height:auto; margin:0 auto; background-color:#ffffff; overflow:hidden;}
+.header{width:100%; min-width:1200px; height:100px; background-color:#0e3a6e;}
+.header>div{float:left; color:#FFFFFF;}
+
+/*
+.header .auth{width:100%; height:40px;}
+.header .auth>.info{margin:10px 20px; overflow:hidden;}
+.header .auth>.info>p{float:right;}
+.header .menu{width:100%; height:60px;}
+.header .menu>ul{margin:10px 20px; overflow:hidden;}
+.header .menu>ul>li{float:left; height:35px; line-height:35px; margin:0 10px; text-align:center;}
+.header .menu>ul>li:first-child{margin-left:0px;}
+.header .menu>ul>li>a{color:#ffffff;}
+*/
+
+
+/* 컨텐츠 영역 */
+
+.contents.width100{width:100%; margin:0 auto;}
+.contents{overflow:hidden; width:1200px; margin:0 auto;}
+.contents>.cont-title{height:100px;}
+.contents>.cont-title>div{font-size:40px; font-weight:bold; padding:20px;}
+.contents>.board>.board-search{width:500px;}
+.contents>.board>.board-search>form{position:relative;}
+.contents>.board>.board-search>form>select{width:120px; height:43px; float:left; margin:5px 0px; margin-right:10px; padding: 5px 0px; border:1px solid #e0e0e0; }
+.contents>.board>.board-search>form>input{float:left;}
+.contents>.board>.board-search>form>a{position:absolute; top:0; right:0;}
+
+.contents>.board>.board-btn{margin:10px 0px; overflow:hidden;}
+.contents>.board>.board-btn>a{width:100px; height:40px; line-height:40px; font-size:14px; font-weight:bold; display:inline-block; margin:5px; border-radius:8px; background-color:#f5f5f5; text-align:center; float:right;}
+.contents>.board>.board-btn>a:first-child{margin-right:10px; }
+
+.contents>.board>.page{width:100%;}
+.contents>.board>.page>ul{text-align:center; margin:20px 0px;}
+.contents>.board>.page>ul>a{display:inline-block; width:32px; height:32px; text-align:center; line-height:32px;}
+
+
+
+.box{ border:1px solid #e0e0e0; margin:0 auto;}
+.box.login{ width:380px; border-radius:8px; margin:100px auto;}
+.box.join{ width:380px; border-radius:8px; margin:100px auto;}
+
+
+.input-select{text-align:center;}
+.phone-first{width:80px; height:40px; display:inline-block; border-radius:8px; border:1px solid #e0e0e0; padding:5px;}
+.phone-second{width:175px; display:inline-block;}
+
+.input-anchor{position:relative;}
+.input-anchor>a{display:block; position:absolute; top:5px; right:40px;}
+.input-anchor>a>img{width:32px; height:32px; }
+
+input{width:260px; height:30px; display:block; border-radius:8px; border:1px solid #e0e0e0; padding:5px 30px 5px 20px; margin:5px auto; }
+input::placeholder{color:#e0e0e0;}
+input:focus{ border:1px solid #0e3a6e;}
+
+
+
+
+.placeholder-color-red::placeholder{color:#e60005;}
+
+
+.btn{width:100%; margin:80px auto; overflow:hidden; text-align:center;}
+.btn>a{display:inline-block; width:150px; text-align:center; width:150px; height:50px; line-height:50px; margin:0px auto; border-radius:16px; border:1px solid #e0e0e0; margin:0px 20px;}
+.btn>.submit{background-color:#0e3a6e; color:#ffffff; border:none;}
+.btn>.cancel{}
+
+
+
+/* company */
+/* /mypage/company/write */
+.board{margin:100px 0px;}
+.cont-info{width:100%; overflow:hidden;}
+.cont-info>div{float:left;}
+.cont-info>div.image-field{width:300px;}
+.cont-info>div.rtb-field{width:900px;}
+
+.cont-info .rtb-field .rw{width:900px; height: 45px; margin:5px 0px; float:left; text-align:center; line-height:45px;}
+.cont-info .rtb-field .rw .dtd{float:left;}
+.cont-info .rtb-field .rw .dtd>div{float:left; display:inline-block;}
+.cont-info .rtb-field .rw .dtd .tit{width:150px;}
+.cont-info .rtb-field .rw .dtd .data-field{width:300px;}
+.cont-info .rtb-field .rw .dtd .data-field>select{width:160px; height:40px; padding:5px; border:1px solid #e0e0e0; float:left; margin:5px auto;}
+.cont-info .rtb-field .rw .dtd .data-field>input{display:inline-block; width:160px; float:left;}
+.cont-info .rtb-field .rw .dtd .data-field.file{width:750px;}
+.cont-info .rtb-field .rw .dtd .data-field.file>input{width:400px;}
+
+
+.cont-textarea{width:100%; margin-top:50px;}
+
+
+
+/* project */
+/* /project/recruit/write */
+
+.board{margin:100px 0px;}
+.cont-info{width:100%; overflow:hidden;}
+.cont-info>div{float:left;}
+.cont-info>div.image-field{width:300px;}
+.cont-info>div.rtb-field{width:900px;}
+
+.cont-info .rtb-field .rw{width:900px; height: 45px; margin:5px 0px; float:left; text-align:center; line-height:45px;}
+.cont-info .rtb-field .rw .dtd{float:left;}
+.cont-info .rtb-field .rw .dtd>div{float:left; display:inline-block;}
+.cont-info .rtb-field .rw .dtd .tit{width:150px;}
+.cont-info .rtb-field .rw .dtd .data-field{width:300px;}
+.cont-info .rtb-field .rw .dtd .data-field>select{width:160px; height:40px; padding:5px; border:1px solid #e0e0e0; float:left; margin:5px auto;}
+.cont-info .rtb-field .rw .dtd .data-field>input{display:inline-block; width:160px; float:left;}
+.cont-info .rtb-field .rw .dtd .data-field.file{width:750px;}
+.cont-info .rtb-field .rw .dtd .data-field.file>input{width:400px;}
+
+
+.cont-textarea{width:100%; margin-top:50px;}
+
+
+
+
+
+
+
+

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bnc.mapper.AuthMapper">
+	<!-- Member Select -->
+	<select id="selectMember" resultType="int">
+		select count(memb_id) from BNC_MEMBER where memb_id=#{memb_id}
+	</select>
+	
+	<!-- Member Select -->
+	<select id="selectMemberData" resultType="com.bnc.domain.MemberVO">
+		select * from BNC_MEMBER where memb_id=#{memb_id}
+	</select>
+	
+	<!-- Member Insert -->
+	<insert id="insertMember">
+		insert into BNC_MEMBER(memb_id, memb_kind, memb_email, memb_rdate, memb_auth_flag, memb_ip)
+			values(#{memb_id}, #{memb_kind}, #{memb_email}, TO_CHAR(sysdate, 'YYYYMMDDHHiiss'), 'N', #{memb_ip})
+	</insert>
+	
+	
+	<!-- Member Log Insert -->
+	<insert id="insertMemberLog">
+		insert into BNC_MEMBER_LOG values (#{meml_id}, TO_CHAR(sysdate, 'YYYYMMDDHHiiss'), #{meml_ip})
+	</insert>
+	
+	<!-- Membership Withdrawal -->
+	<update id="deleteMember">
+		update BNC_MEMBER set memb_auth_flag='W' where memb_email=#{memb_email}
+	</update>
+		
+	<!-- BizCode Category Select -->
+	<select id="bizcodeList" resultType="com.bnc.domain.BizCategoryVO">
+		select * from BNC_BIZ_CATEGORY
+	</select>
+	
+	<!-- CompanyInfo Insert -->
+	<insert id="insertCompanyInfo">
+		insert into BNC_COMPANY(cmpy_biznum,
+								cmpy_biz_doc_file_path,
+								cmpy_memb_id,
+								cmpy_company_name,
+								cmpy_ci_file_path,
+								cmpy_ceo_name,
+								cmpy_biz_code,
+								cmpy_biz_address,
+								cmpy_biz_phone,
+								cmpy_biz_email,
+								cmpy_contents,
+								cmpy_homepage,
+								cmpy_rdate,
+								cmpy_udate)
+			values(#{cmpy_biznum},
+				   #{cmpy_biz_doc_file_path},
+				   #{cmpy_memb_id},
+				   #{cmpy_company_name},
+				   #{cmpy_ci_file_path, jdbcType=VARCHAR},
+				   #{cmpy_ceo_name}, 
+				   #{cmpy_biz_code},
+				   #{cmpy_biz_address, 	jdbcType=VARCHAR},
+				   #{cmpy_biz_phone, 	jdbcType=VARCHAR},
+				   #{cmpy_biz_email, 	jdbcType=VARCHAR},
+				   #{cmpy_contents, 	jdbcType=VARCHAR},
+				   #{cmpy_homepage, 	jdbcType=VARCHAR},
+				   TO_CHAR(sysdate, 'YYYYMMDDHHiiss'),
+				   TO_CHAR(sysdate, 'YYYYMMDDHHiiss'))
+	</insert>
+	
+	<!-- CompanyInfo Select -->
+	<select id="CompanyInfo" resultType="com.bnc.domain.CompanyVO">
+		select c.cmpy_ci_file_path,
+			   c.cmpy_company_name,
+			   c.cmpy_ceo_name,
+			   b.bizc_name,
+			   c.cmpy_biz_phone,
+			   c.cmpy_biz_address,
+			   c.cmpy_biz_email,
+			   c.cmpy_homepage,
+			   c.cmpy_contents 
+		from BNC_COMPANY c, bnc_biz_category b 
+		where c.cmpy_biz_code = b.bizc_code and c.cmpy_memb_id = #{cmpy_memb_id}
+	</select>
+	
+	<!-- CompanyInfo Update -->
+	<update id="modifyCompanyInfo">
+		update BNC_COMPANY set cmpy_ci_file_path = #{cmpy_ci_file_path, jdbcType=VARCHAR},
+							   cmpy_company_name = #{cmpy_company_name},
+							   cmpy_ceo_name = #{cmpy_ceo_name},
+							   cmpy_biz_code = #{cmpy_biz_code},
+							   cmpy_biz_address = #{cmpy_biz_address, jdbcType=VARCHAR},
+							   cmpy_biz_phone = #{cmpy_biz_phone, jdbcType=VARCHAR},
+							   cmpy_biz_email = #{cmpy_biz_email, jdbcType=VARCHAR},
+							   cmpy_contents = #{cmpy_contents, jdbcType=VARCHAR},
+							   cmpy_homepage = #{cmpy_homepage, jdbcType=VARCHAR},
+							   cmpy_udate = TO_CHAR(sysdate, 'YYYYMMDDHHiiss')
+		where cmpy_memb_id = #{cmpy_memb_id}
+	</update>
+	
+	<!-- SignManage List -->
+	<select id="signList" resultType="com.bnc.domain.SignVO">
+		select * from BNC_SIGN where sign_memb_id = #{sign_memb_id} order by sign_num desc
+	</select>
+	
+	<!-- SignManage Insert -->
+	<insert id="insertSign">
+		insert into BNC_SIGN values(sign_seq.nextval, #{sign_file_path}, #{sign_memb_id}, TO_CHAR(sysdate, 'YYYYMMDDHHiiss'), TO_CHAR(sysdate, 'YYYYMMDDHHiiss'))
+	</insert>
+	
+	<!-- SignManage Select -->
+	<select id="selectSign" resultType="com.bnc.domain.SignVO">
+		select * from BNC_SIGN where sign_num = #{sign_num} and sign_memb_id = #{sign_memb_id}
+	</select>
+	
+	<!-- SignManage Update -->
+	<update id="modifySign" >
+		update BNC_SIGN set sign_file_path=#{sign_file_path},
+							sign_udate=TO_CHAR(sysdate, 'YYYYMMDDHHiiss')
+		where sign_num = #{sign_num} and sign_memb_id = #{sign_memb_id}
+	</update>
+	
+	<!-- SignManage Delete -->
+	<delete id="deleteSign">
+		delete from BNC_SIGN where sign_num = #{sign_num}
+	</delete>
+	
+	<select id="memberCount" resultType="int">
+		select count(*) from bnc_member
+	</select>
+</mapper>

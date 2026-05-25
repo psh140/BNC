@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bnc.mapper.ContractMapper">
+ 	
+ 	<resultMap type="com.bnc.domain.ContractDTO" id="ContractDTO">
+		<result property="cntr_contents" column="cntr_contents" jdbcType="VARCHAR" javaType="java.lang.String"/>
+	</resultMap>
+	
+	<select id="selectContractCount" resultType="int">
+		SELECT COUNT(*) FROM bnc_contract
+		WHERE cntr_proj_number = #{proj_number}
+	</select>
+	
+	<select id="selectContractData" resultMap="ContractDTO">
+		SELECT 
+			cntr_proj_number,
+			cntr_price,
+			cntr_flag,
+			cntr_start_date,
+			cntr_end_date,
+			
+			cntr_req_biznum,
+			cntr_req_ceo_name,
+			cntr_req_sign_path,
+			
+			cntr_acp_biznum,
+			cntr_acp_ceo_name,
+			cntr_acp_sign_path,
+			cntr_rdate,
+			cntr_udate,
+			
+			cntr_contents
+
+		FROM bnc_contract
+		
+		WHERE cntr_proj_number = #{proj_number}
+	</select>
+	
+	<insert id="insertReqContractData">
+		INSERT INTO bnc_contract
+		(
+			cntr_proj_number, cntr_price, cntr_flag, cntr_rdate, cntr_udate,
+			cntr_acp_biznum,
+			cntr_req_biznum,
+			cntr_req_sign_path, 
+			cntr_req_ceo_name,
+			cntr_start_date,
+			cntr_end_date,
+			cntr_contents
+		)
+		VALUES(
+			#{cntr_proj_number},
+			#{cntr_price},
+			'N',
+			TO_CHAR(sysdate, 'YYYYMMDDHHmmss'),
+			TO_CHAR(sysdate, 'YYYYMMDDHHmmss'),
+			#{cntr_acp_biznum},
+			#{cntr_req_biznum},
+			#{cntr_req_sign_path},
+			#{cntr_req_ceo_name},
+			#{cntr_start_date},
+			#{cntr_end_date},
+			#{cntr_contents}
+		)
+	</insert>
+	
+	<insert id="updateReqContractData">
+		UPDATE bnc_contract SET
+		
+		cntr_price 	= #{cntr_price},
+		cntr_flag 	= 'N',
+		cntr_udate 	= TO_CHAR(sysdate, 'YYYYMMDDHHmmss'),
+		cntr_req_sign_path 	= #{cntr_req_sign_path},
+		cntr_req_ceo_name 	= #{cntr_req_ceo_name},
+		cntr_start_date		= #{cntr_start_date},
+		cntr_end_date		= #{cntr_end_date},
+		cntr_contents		= #{cntr_contents},
+		
+		cntr_acp_sign_path	= null,
+		cntr_acp_ceo_name	= null
+		
+		WHERE cntr_proj_number = #{cntr_proj_number}
+	</insert>
+	
+	<insert id="updateAcpContractData">
+		UPDATE bnc_contract SET
+		
+		cntr_flag	= 'Y',
+		cntr_udate 	= TO_CHAR(sysdate, 'YYYYMMDDHHmmss'),
+		cntr_acp_sign_path	= #{cntr_acp_sign_path},
+		cntr_acp_ceo_name	= #{cntr_acp_ceo_name}
+		
+		WHERE cntr_proj_number = #{cntr_proj_number}
+	</insert>
+	
+	<!-- 계약서 삭제 -->
+	<delete id="deleteContract">
+		delete from bnc_contract
+		where cntr_proj_number = #{proj_number}
+	</delete>
+	
+	<!-- 계약서 삭제 -->
+	<delete id="deleteContractLog">
+		delete from bnc_project_contract_log
+		where pctl_proj_number = #{proj_number}
+	</delete>
+	
+
+	<insert id="insertContractCompanyData">
+		INSERT INTO bnc_contract_company
+		(
+			cntc_cmpy_biznum,
+			cntc_contract_form
+		)
+		values
+		(
+			#{cntc_cmpy_biznum},
+			#{cntc_contract_form}
+		)
+	</insert>
+	
+	<insert id="updateContractCompanyData">
+		UPDATE bnc_contract_company
+		
+		SET cntc_contract_form = #{cntc_contract_form}
+		
+		WHERE cntc_cmpy_biznum = #{cntc_cmpy_biznum}
+	</insert>
+	
+	<resultMap type="map" id="contractFormData">
+		<result property="cntc_contract_form" column="cntc_contract_form" jdbcType="VARCHAR" javaType="java.lang.String"/>
+	</resultMap>
+	
+	<select id="selectContractCompanyData" resultMap="contractFormData">
+		select cntc_cmpy_biznum, cntc_contract_form from bnc_contract_company
+		WHERE cntc_cmpy_biznum = #{cmpy_biznum}
+	</select>
+</mapper>

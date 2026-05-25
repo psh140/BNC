@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bnc.mapper.CompanyMapper">
+	
+	<!-- Company List Count -->
+	<select id="selectCompanyListCount" resultType="int">
+		<![CDATA[
+			SELECT count(*) FROM bnc_company company, bnc_biz_category cate
+			WHERE company.cmpy_biz_code = cate.bizc_code
+		]]>
+			<choose>
+				<when test="searchType != null and searchType !='' ">
+				 AND cate.${searchType} like '%'||#{searchKeyword}||'%'
+				</when>				
+			</choose>	
+	</select>
+	
+	<!-- Company List -->
+	<select id="selectCompanyList" resultType="com.bnc.domain.CompanyVO">
+		<![CDATA[
+		  SELECT * FROM (
+		  	SELECT ROWNUM AS RNUM, list.* FROM (
+		  		SELECT * FROM bnc_company company, bnc_biz_category cate
+		  		WHERE company.cmpy_biz_code = cate.bizc_code
+		]]>
+			<choose>
+			  <when test="searchType != null and searchType !='' ">
+			   AND cate.${searchType} like '%'||#{searchKeyword}||'%'
+			  </when>
+			</choose>
+		<![CDATA[
+			) list
+		)	
+		]]>
+		
+		<![CDATA[
+		 WHERE RNUM > #{startRowNumber} AND RNUM <= #{endRowNumber}		 
+		]]>
+   </select>
+   
+	<select id="getList" resultType="com.bnc.domain.CompanyVO">
+		SELECT *
+		FROM bnc_company
+		order by cmpy_rdate desc
+	</select>
+	
+	<select id="getTotalCount" resultType="int">
+		SELECT count(cmpy_biznum) FROM bnc_company 
+	</select>
+	
+	<!-- Company View -->
+	<select id="selectBiznumRead" resultType="com.bnc.domain.CompanyVO">
+		SELECT * FROM bnc_company company, bnc_biz_category cate WHERE company.cmpy_biz_code = cate.bizc_code and cmpy_biznum = #{cmpy_biznum}
+	</select>
+	
+	<!-- Company Delete -->
+	<delete id="delete">
+		DELETE FROM bnc_company WHERE cmpy_biznum = #{cmpy_biznum} 
+	</delete>
+	
+	<!-- Company modify -->
+	
+	<update id="modify">
+		UPDATE bnc_company
+			SET
+			cmpy_biznum = #{cmpy_biznum},
+			cmpy_biz_doc_file_path = #{cmpy_biz_doc_file_path},
+			cmpy_udate = TO_CHAR(sysdate, 'YYYYMMDDHHmmss')
+			WHERE
+			cmpy_memb_id = #{cmpy_memb_id}
+	</update>
+</mapper>

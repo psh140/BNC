@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bnc.mapper.MemberMapper">
+
+	<!-- Member List Count -->
+	<select id="selectMemberListCount" resultType="int">
+		<![CDATA[
+		SELECT count(*) FROM bnc_member m, bnc_company c WHERE 
+		]]> 
+			<choose>
+	         <when test="searchType != null and searchType !='' ">
+	         m.${searchType} like '%'||#{searchKeyword}||'%' AND 
+	         </when>
+	      </choose>
+	      <![CDATA[
+	      m.memb_id = c.cmpy_memb_id
+	      ]]>
+	</select>
+	
+	<!-- Member List -->
+	<select id="selectMemberList" resultType="com.bnc.domain.MemberCompanyVO">
+      <![CDATA[
+      SELECT * FROM (
+         SELECT ROWNUM AS RNUM, list.* FROM (
+            SELECT * FROM bnc_member m, bnc_company c WHERE
+      ]]>
+	      <choose>
+	         <when test="searchType != null and searchType !='' ">
+	          m.${searchType} like '%'||#{searchKeyword}||'%' AND  
+	         </when>
+	      </choose>
+      <![CDATA[
+         m.memb_id = c.cmpy_memb_id
+         ) list
+      )
+      ]]>
+      
+      <![CDATA[
+      WHERE RNUM > #{startRowNumber} AND RNUM <= #{endRowNumber}
+      ]]>
+   </select>
+   
+	<!-- Member View -->
+	<select id="read" resultType="com.bnc.domain.MemberCompanyVO">
+		SELECT * FROM bnc_member m, bnc_company c WHERE m.memb_id = c.cmpy_memb_id AND m.memb_id = #{memb_id}
+	</select>
+
+	<!-- Member Delete -->
+	<delete id="delete">
+		DELETE FROM bnc_member m, bnc_company c WHERE c.cmpy_memb_id = #{memb_id}
+	</delete>
+	
+	<select id="selectLogListCount" resultType="int">
+		SELECT count(*) FROM bnc_member_log
+		WHERE meml_id = #{memb_id}
+	</select>
+	
+	<!-- Log Read -->
+	<select id="selectLogList" resultType="com.bnc.domain.MemberLogVO">
+	      SELECT * FROM (
+	         SELECT ROWNUM AS RNUM, list.* FROM (
+	            SELECT * FROM bnc_member_log log 
+	            WHERE log.meml_id = #{memb_id}
+	         ) list
+	      )
+	</select>
+	
+	<update id="activate">
+	 	UPDATE bnc_member set
+	 		memb_auth_flag = 'Y'
+	 		WHERE memb_id = #{memb_id}
+	</update>
+	
+	<update id="inactivate">
+	 	UPDATE bnc_member set
+	 		memb_auth_flag = 'N'
+	 		WHERE memb_id = #{memb_id}
+	</update>
+</mapper>

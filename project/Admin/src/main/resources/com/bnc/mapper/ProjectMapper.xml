@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bnc.mapper.ProjectMapper">
+
+	<!-- Project List Count -->
+	<select id="selectProjectListCount" resultType="int">
+		<![CDATA[
+		SELECT count(*) FROM bnc_project
+		]]> 
+			<choose>
+	         <when test="searchType != null and searchType !='' ">
+	         WHERE bnc_project.${searchType} like '%'||#{searchKeyword}||'%'
+	         </when>
+	      </choose>
+	</select>
+	
+	<!-- Project List -->
+	<select id="selectProjectList" resultType="com.bnc.domain.ProjectVO">
+      <![CDATA[
+      SELECT * FROM (
+         SELECT ROWNUM AS RNUM, list.* FROM (
+            SELECT * FROM bnc_project project 
+      ]]>
+	      <choose>
+	         <when test="searchType != null and searchType !='' ">
+	         WHERE project.${searchType} like '%'||#{searchKeyword}||'%'
+	         </when>
+	      </choose>
+	      order by proj_number DESC
+      <![CDATA[
+         ) list
+      )
+      ]]>
+      
+      <![CDATA[
+      WHERE RNUM > #{startRowNumber} AND RNUM <= #{endRowNumber}
+      ]]>
+   </select>
+
+	<select id="getList" resultType="com.bnc.domain.ProjectVO">
+		SELECT proj_number, proj_name, proj_kind, proj_flag, proj_price_range, proj_rdate
+		FROM bnc_project
+		order by proj_rdate desc
+	</select>
+	
+	<select id="getTotalCount" resultType="int">
+		SELECT count(proj_number) FROM bnc_project 
+	</select>
+	
+	<!-- Project View -->
+	<select id="projectRead" resultType="com.bnc.domain.ProjectVO">
+		SELECT * FROM bnc_project WHERE proj_number = #{proj_number}
+	</select>
+	
+	<!-- Project Delete -->
+	<delete id="delete">
+		DELETE FROM bnc_project WHERE proj_number = #{proj_number} 
+	</delete>
+	
+	<select id="participateListSelect" resultType="com.bnc.domain.ProjectParticipateListVO">
+		SELECT * FROM bnc_project_participate_list WHERE prpl_number = #{proj_number}
+	</select>
+	
+	<select id="contractRead" resultType="com.bnc.domain.ContractVO">
+		SELECT * FROM bnc_contract WHERE cntr_proj_number = #{proj_number}
+	</select>
+
+</mapper>
