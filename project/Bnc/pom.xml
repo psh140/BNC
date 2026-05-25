@@ -158,11 +158,11 @@
 	        <version>${org.springframework-version}</version>
     	</dependency>
     	
-    	<!-- log4jdbc -->
+    	<!-- PostgreSQL JDBC Driver -->
     	<dependency>
-	        <groupId>org.bgee.log4jdbc-log4j2</groupId>
-	        <artifactId>log4jdbc-log4j2-jdbc4</artifactId>
-	        <version>1.16</version>
+	        <groupId>org.postgresql</groupId>
+	        <artifactId>postgresql</artifactId>
+	        <version>42.7.3</version>
     	</dependency>
 
 		<!-- @Inject -->
@@ -259,21 +259,7 @@
 			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
-		<!--  ojdbc6 이하 리포지토리스 설정해줘야함 -->
-		<dependency>
-			<groupId>oracle</groupId>
-			<artifactId>ojdbc6</artifactId>
-			<version>11.2.0.3</version>
-		</dependency>
 	</dependencies>
-	<!-- ojdbc6 관련 리포지토리스 설정 부분 -->
-	<!-- https://mvnrepository.com/artifact/oracle/ojdbc6/11.2.0.3 참고 -->
-	<repositories>
-		 <repository>
-      		<id>Datanucleus</id>
-      		<url>http://www.datanucleus.org/downloads/maven2/</url>
-    	</repository>
-	</repositories>
     <build>
         <plugins>
             <plugin>
