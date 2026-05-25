@@ -166,11 +166,11 @@
 	        <version>${org.springframework-version}</version>
     	</dependency>
     	
-    	<!-- log4jdbc -->
+    	<!-- PostgreSQL JDBC Driver -->
     	<dependency>
-	        <groupId>org.bgee.log4jdbc-log4j2</groupId>
-	        <artifactId>log4jdbc-log4j2-jdbc4</artifactId>
-	        <version>1.16</version>
+	        <groupId>org.postgresql</groupId>
+	        <artifactId>postgresql</artifactId>
+	        <version>42.7.3</version>
     	</dependency>
 
 		<!-- Mail Service -->
@@ -230,18 +230,7 @@
 			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>oracle</groupId>
-			<artifactId>ojdbc6</artifactId>
-			<version>11.2.0.3</version>
-		</dependency>
 	</dependencies>
-	<repositories>
-		 <repository>
-      		<id>Datanucleus</id>
-      		<url>http://www.datanucleus.org/downloads/maven2/</url>
-    	</repository>
-	</repositories>
     <build>
         <plugins>
             <plugin>
