@@ -59,23 +59,13 @@
 
 ---
 
-## 6. 인프라 구성
+## 6. 인프라 구성 ✅
 
-- [ ] `Bnc/Dockerfile` 작성 (maven:3.8-openjdk-8 빌드 → tomcat:9.0-jdk8 실행)
-- [ ] `Admin/Dockerfile` 작성 (동일 구조)
-- [ ] `docker-compose.yml` 작성
-  - services: postgres, bnc-app, admin-app, nginx
-  - named volume: resources (파일 업로드 공유), postgres_data
-  - env_file: .env
-- [ ] `nginx.conf` 작성
-  - `/` → bnc-app:8080 프록시
-  - `/admin` → admin-app:8080 프록시
-  - `/resources/` → 업로드 파일 볼륨에서 직접 서빙
-- [ ] `init.sql` 작성 — Oracle DDL → PostgreSQL DDL 변환
-  - VARCHAR2 → VARCHAR, NUMBER → INTEGER, LONG → TEXT
-  - Oracle 스토리지 옵션 전부 제거
-  - SEQUENCE 문법 변환
-  - 기초 데이터 INSERT (BNC_ADMIN, BNC_BIZ_CATEGORY 등)
+- [x] `Bnc/Dockerfile` 작성
+- [x] `Admin/Dockerfile` 작성
+- [x] `docker-compose.yml` 작성
+- [x] `nginx.conf` 작성
+- [x] `init.sql` 작성
 - [ ] 로컬 docker-compose up 테스트
 
 ---
