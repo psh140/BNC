@@ -66,8 +66,7 @@ public class KakaoLoginConn {
 //            System.out.println("response body : " + result);
             
             //    Gson 라이브러리에 포함된 클래스로 JSON파싱 객체 생성
-            JsonParser parser = new JsonParser();
-            JsonElement element = parser.parse(result);
+            JsonElement element = JsonParser.parseString(result);
             
             access_Token = element.getAsJsonObject().get("access_token").getAsString();
             refresh_Token = element.getAsJsonObject().get("refresh_token").getAsString();
@@ -112,8 +111,7 @@ public HashMap<String, Object> getUserInfo (String access_Token) {
             
 //            System.out.println("response body : " + result);
             
-            JsonParser parser = new JsonParser();
-            JsonElement element = parser.parse(result);
+            JsonElement element = JsonParser.parseString(result);
             
             JsonObject kakao_account = element.getAsJsonObject().get("kakao_account").getAsJsonObject();
             

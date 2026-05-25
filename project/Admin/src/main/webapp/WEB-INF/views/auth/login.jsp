@@ -41,7 +41,7 @@
 	function loginSubmit() {
 		var form = document.loginForm;
 		
-		form.action="/auth/login";
+		form.action="/admin/auth/login";
 		form.submit();
 	}
 </script>

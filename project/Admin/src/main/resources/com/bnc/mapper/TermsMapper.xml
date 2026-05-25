@@ -13,7 +13,7 @@
 	<!-- Terms Modify -->
 	<update id="modify">
 		update bnc_terms set 
-			pol_udate = TO_CHAR(sysdate, 'YYYYMMDDHHmmss'),
+			pol_udate = TO_CHAR(NOW(), 'YYYYMMDDHH24MISS'),
 			pol_contents = #{pol_contents}
 			WHERE pol_kind = #{pol_kind}
 	</update>

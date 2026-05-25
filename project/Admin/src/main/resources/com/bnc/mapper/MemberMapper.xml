@@ -5,75 +5,67 @@
 	<!-- Member List Count -->
 	<select id="selectMemberListCount" resultType="int">
 		<![CDATA[
-		SELECT count(*) FROM bnc_member m, bnc_company c WHERE 
-		]]> 
+		SELECT count(*) FROM bnc_member m, bnc_company c WHERE
+		]]>
 			<choose>
 	         <when test="searchType != null and searchType !='' ">
-	         m.${searchType} like '%'||#{searchKeyword}||'%' AND 
+	         m.${searchType} like '%'||#{searchKeyword}||'%' AND
 	         </when>
 	      </choose>
 	      <![CDATA[
 	      m.memb_id = c.cmpy_memb_id
 	      ]]>
 	</select>
-	
+
 	<!-- Member List -->
 	<select id="selectMemberList" resultType="com.bnc.domain.MemberCompanyVO">
-      <![CDATA[
-      SELECT * FROM (
-         SELECT ROWNUM AS RNUM, list.* FROM (
-            SELECT * FROM bnc_member m, bnc_company c WHERE
-      ]]>
-	      <choose>
-	         <when test="searchType != null and searchType !='' ">
-	          m.${searchType} like '%'||#{searchKeyword}||'%' AND  
-	         </when>
-	      </choose>
-      <![CDATA[
-         m.memb_id = c.cmpy_memb_id
-         ) list
-      )
-      ]]>
-      
-      <![CDATA[
-      WHERE RNUM > #{startRowNumber} AND RNUM <= #{endRowNumber}
-      ]]>
-   </select>
-   
+		SELECT * FROM (
+			SELECT ROW_NUMBER() OVER() AS rnum, list.* FROM (
+				SELECT * FROM bnc_member m, bnc_company c WHERE
+				<choose>
+					<when test="searchType != null and searchType !='' ">
+						m.${searchType} like '%'||#{searchKeyword}||'%' AND
+					</when>
+				</choose>
+				<![CDATA[m.memb_id = c.cmpy_memb_id]]>
+			) list
+		) sub
+		<![CDATA[WHERE rnum > #{startRowNumber} AND rnum <= #{endRowNumber}]]>
+	</select>
+
 	<!-- Member View -->
 	<select id="read" resultType="com.bnc.domain.MemberCompanyVO">
 		SELECT * FROM bnc_member m, bnc_company c WHERE m.memb_id = c.cmpy_memb_id AND m.memb_id = #{memb_id}
 	</select>
 
-	<!-- Member Delete -->
+	<!-- Member Delete (member + company 동시 삭제) -->
 	<delete id="delete">
-		DELETE FROM bnc_member m, bnc_company c WHERE c.cmpy_memb_id = #{memb_id}
+		WITH deleted_company AS (
+			DELETE FROM bnc_company WHERE cmpy_memb_id = #{memb_id}
+		)
+		DELETE FROM bnc_member WHERE memb_id = #{memb_id}
 	</delete>
-	
+
 	<select id="selectLogListCount" resultType="int">
 		SELECT count(*) FROM bnc_member_log
 		WHERE meml_id = #{memb_id}
 	</select>
-	
+
 	<!-- Log Read -->
 	<select id="selectLogList" resultType="com.bnc.domain.MemberLogVO">
-	      SELECT * FROM (
-	         SELECT ROWNUM AS RNUM, list.* FROM (
-	            SELECT * FROM bnc_member_log log 
-	            WHERE log.meml_id = #{memb_id}
-	         ) list
-	      )
+		SELECT * FROM bnc_member_log log
+		WHERE log.meml_id = #{memb_id}
 	</select>
-	
+
 	<update id="activate">
-	 	UPDATE bnc_member set
-	 		memb_auth_flag = 'Y'
-	 		WHERE memb_id = #{memb_id}
+		UPDATE bnc_member set
+			memb_auth_flag = 'Y'
+			WHERE memb_id = #{memb_id}
 	</update>
-	
+
 	<update id="inactivate">
-	 	UPDATE bnc_member set
-	 		memb_auth_flag = 'N'
-	 		WHERE memb_id = #{memb_id}
+		UPDATE bnc_member set
+			memb_auth_flag = 'N'
+			WHERE memb_id = #{memb_id}
 	</update>
 </mapper>

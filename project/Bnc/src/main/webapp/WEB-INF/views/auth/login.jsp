@@ -19,6 +19,9 @@
 						카카오로 로그인
 						<!-- img width="223" src="#"/-->
 					</a>
+					<a class="admin" href="/admin/auth/login" style="display:block; margin-top:20px; text-align:center; color:#888; font-size:13px;">
+						관리자 페이지
+					</a>
 				</div>
 			</div>
 		</div>
