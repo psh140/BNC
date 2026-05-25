@@ -17,10 +17,10 @@
 		
 	<!-- Database Connection -->
 	<bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
-		<property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"></property>
-		<property name="jdbcUrl" value="***REMOVED***"></property> 
-		<property name="username" value="***REMOVED***"></property>
-		<property name="password" value="***REMOVED***"></property>
+		<property name="driverClassName" value="org.postgresql.Driver"></property>
+		<property name="jdbcUrl" value="#{systemEnvironment['DB_URL']}"></property>
+		<property name="username" value="#{systemEnvironment['DB_USERNAME']}"></property>
+		<property name="password" value="#{systemEnvironment['DB_PASSWORD']}"></property>
 	</bean>
 	
 	<!-- Database Close -->
