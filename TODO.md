@@ -25,49 +25,69 @@
 
 ---
 
-## 3. pom.xml 수정
+## 3. pom.xml 수정 ✅
 
-- [ ] `Bnc/pom.xml` — Oracle JDBC 드라이버 제거, PostgreSQL JDBC 드라이버 추가
-- [ ] `Admin/pom.xml` — 동일
+- [x] `Bnc/pom.xml` — Oracle JDBC 드라이버 제거, PostgreSQL JDBC 드라이버 추가, Gson 2.10.1 업그레이드
+- [x] `Admin/pom.xml` — 동일
 
 ---
 
-## 4. 쿼리 변환 + 버그 수정 (한 번에)
+## 4. 쿼리 변환 + 버그 수정 ✅
 
 ### Bnc 프로젝트
-- [ ] `AuthMapper.xml` — `sysdate` → `NOW()`, `sign_seq.nextval` → `nextval('sign_seq')`
-- [ ] `ProjectMapper.xml` — `sysdate` → `NOW()`, `ROWNUM` → `LIMIT/OFFSET`, 시퀀스 변환
-- [ ] `ContractMapper.xml` — `sysdate` → `NOW()`, `<insert>` 태그로 작성된 UPDATE 3개 → `<update>` 태그로 교체
-- [ ] `NoticeMapper.xml` — `sysdate` → `NOW()`, WHERE 절 뒤 잘못된 콤마 제거
-- [ ] `TermsMapper.xml` — 확인 후 필요시 수정
+- [x] `AuthMapper.xml` — `sysdate` → `NOW()`, `sign_seq.nextval` → `nextval('sign_seq')`
+- [x] `ProjectMapper.xml` — `sysdate` → `NOW()`, `ROWNUM` → `ROW_NUMBER() OVER()`, 시퀀스 변환
+- [x] `ContractMapper.xml` — `sysdate` → `NOW()`, `<insert>` 태그 UPDATE 3개 → `<update>` 태그로 교체
+- [x] `NoticeMapper.xml` — `sysdate` → `NOW()`, WHERE 절 잘못된 콤마 제거, `n_udate` → `notc_udate` 수정
+- [x] `CompanyMapper.xml` — `ROWNUM` → `ROW_NUMBER() OVER()` (TODO 누락 파일 추가 변환)
+- [x] `TermsMapper.xml` — 변경 불필요 확인
 
 ### Admin 프로젝트
-- [ ] `AuthMapper.xml` — `sysdate` → `NOW()`, `sign_seq.nextval` → `nextval('sign_seq')`
-- [ ] `ProjectMapper.xml` — `sysdate` → `NOW()`, `ROWNUM` → `LIMIT/OFFSET`, 시퀀스 변환
-- [ ] `NoticeMapper.xml` — `sysdate` → `NOW()`, `ROWNUM` → `LIMIT/OFFSET`, 시퀀스 변환
-- [ ] `DocumentMapper.xml` — `ROWNUM` → `LIMIT/OFFSET`, 시퀀스 변환
-- [ ] `MemberMapper.xml` — `ROWNUM` → `LIMIT/OFFSET`, 멀티테이블 DELETE → 단일 DELETE 2개로 분리
-- [ ] `ChartMapper.xml` — `DECODE` → `CASE WHEN`, `NVL` → `COALESCE`, `CONNECT BY LEVEL` → `generate_series()`, `ROWNUM` TOP-N → `LIMIT`
+- [x] `AuthMapper.xml` — 변경 불필요 확인
+- [x] `ProjectMapper.xml` — `ROWNUM` → `ROW_NUMBER() OVER()`
+- [x] `NoticeMapper.xml` — `sysdate` → `NOW()`, `ROWNUM` → `ROW_NUMBER() OVER()`, 시퀀스 변환
+- [x] `DocumentMapper.xml` — `ROWNUM` → `ROW_NUMBER() OVER()`, 시퀀스 변환
+- [x] `MemberMapper.xml` — `ROWNUM` → `ROW_NUMBER() OVER()`, 멀티테이블 DELETE → CTE 방식으로 처리
+- [x] `ChartMapper.xml` — `DECODE` → `CASE WHEN`, `NVL` → `COALESCE`, `CONNECT BY LEVEL` → `generate_series()`, `ROWNUM` TOP-N → `LIMIT 1`
+- [x] `CompanyMapper.xml` — `ROWNUM` → `ROW_NUMBER() OVER()`, `sysdate` → `NOW()`
+- [x] `TermsMapper.xml` — `sysdate` → `NOW()`
 
 ---
 
-## 5. 코드 정리
+## 5. 코드 정리 ✅
 
-- [ ] `LongHandler.java` — Oracle LONG 전용 타입핸들러 → 삭제
-- [ ] `mybatis-config.xml` (Bnc, Admin) — LongHandler 등록 제거
-- [ ] `KakaoLoginConn.java` — deprecated `new JsonParser().parse()` → `JsonParser.parseString()`으로 교체
+- [x] `LongHandler.java` — 삭제 (Bnc, Admin 양쪽)
+- [x] `mybatis-config.xml` (Bnc, Admin) — LongHandler 등록 제거
+- [x] `KakaoLoginConn.java` — deprecated `new JsonParser().parse()` → `JsonParser.parseString()`으로 교체
 
 ---
 
-## 6. 인프라 구성 ✅
+## 6. 인프라 구성
 
 - [x] `Bnc/Dockerfile` 작성
 - [x] `Admin/Dockerfile` 작성
 - [x] `docker-compose.yml` 작성
-- [x] `nginx.conf` 작성
+- [x] `nginx.conf` 작성 (Admin 라우팅 `/admin/` → `admin-app:8080/` 경로 변환 포함)
 - [x] `init.sql` 작성
-- [ ] 로컬 docker-compose up 테스트
+- [x] 로컬 docker-compose up 테스트 — 메인(`/`), 로그인(`/auth/login`), Admin(`/admin/auth/login`) 모두 200 확인
+- [x] `docker-compose.yml` — bnc-app(8080:8080), admin-app(8081:8080) 포트 외부 노출 추가
+- [x] `init.sql` 첫 실행 에러로 인한 데이터 누락 수정 — `docker-compose down -v` 볼륨 재초기화 후 정상 확인 (bnc_member=8, bnc_company=8, bnc_admin=1, bnc_project=17)
+- [x] Admin `head.jsp` — 정적 리소스 경로 `/common/**` → `/admin/common/**` 전체 수정
+- [x] Admin `header.jsp` — 모든 nav 링크에 `/admin/` prefix 추가
+- [x] nginx `proxy_redirect` 동작 원리 확인 — `LoginInterceptor`는 `/auth/login` 유지 (nginx가 자동으로 `/admin/auth/login`으로 변환)
 - [ ] **OAuth 키 발급 후 .env 수정** — 네이버/카카오 개발자 콘솔에서 키 발급, redirect URI를 `http://localhost/auth/naverLogin`, `http://localhost/auth/kakaoLogin`으로 등록
+
+---
+
+## 6-1. Admin JSP 정적 리소스 경로 전수조사
+
+> `head.jsp` / `header.jsp`는 수정 완료. 그러나 각 페이지별 JSP 파일에서도
+> `/common/` 절대경로를 직접 사용하는 경우가 있음 → nginx가 Bnc 앱으로 잘못 라우팅됨.
+> 발견된 사례: `member/list.jsp`의 `src="/common/image/icon_search.png"`
+
+- [ ] `Admin` 프로젝트 전체 JSP 파일에서 `/common/` 경로 grep
+- [ ] 발견된 모든 경로를 `/admin/common/`으로 수정
+- [ ] docker-compose up 후 각 페이지 정상 렌더링 확인
 
 ---
 

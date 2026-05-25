@@ -5,6 +5,8 @@
 .springBeans
 .metadata/
 .svn/
+Servers/
+readme.txt.txt
 
 # IntelliJ
 .idea/

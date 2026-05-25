@@ -8,17 +8,17 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
 	<!-- meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" /-->
-	<link rel="stylesheet" type="text/css" href="/common/css/style.css" />
-	<!-- link rel="stylesheet" type="text/css" href="/common/css/oyj.css" /-->
-	<link rel="stylesheet" type="text/css" href="/common/css/jquery.scrollbar.css" />
-	
+	<link rel="stylesheet" type="text/css" href="/admin/common/css/style.css" />
+	<!-- link rel="stylesheet" type="text/css" href="/admin/common/css/oyj.css" /-->
+	<link rel="stylesheet" type="text/css" href="/admin/common/css/jquery.scrollbar.css" />
+
 	<script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
-	<script type="text/javascript" src="/common/js/util.js" charset="utf-8"></script>
-	<script type="text/javascript" src="/common/js/utilAjax.js" charset="utf-8"></script>
-	<script type="text/javascript" src="/common/editor/js/HuskyEZCreator.js" charset="utf-8"></script>
-	<script type="text/javascript" src="/common/js/jquery.scrollbar.js"></script>
-	<script type="text/javascript" src="/common/js/ofi.min.js"></script>
-	<script type="text/javascript" src="/common/js/utilValidate.js"></script>    
+	<script type="text/javascript" src="/admin/common/js/util.js" charset="utf-8"></script>
+	<script type="text/javascript" src="/admin/common/js/utilAjax.js" charset="utf-8"></script>
+	<script type="text/javascript" src="/admin/common/editor/js/HuskyEZCreator.js" charset="utf-8"></script>
+	<script type="text/javascript" src="/admin/common/js/jquery.scrollbar.js"></script>
+	<script type="text/javascript" src="/admin/common/js/ofi.min.js"></script>
+	<script type="text/javascript" src="/admin/common/js/utilValidate.js"></script>
 	<script>
 	$(document).ready(function(){
 		/*IE obejct-fit 플러그인  Css font-family:'object-fit:cover' 구문 */

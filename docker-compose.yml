@@ -19,6 +19,8 @@ services:
     build:
       context: ./project/Bnc
     env_file: .env
+    ports:
+      - "8080:8080"
     volumes:
       - resources:/app/resources
     depends_on:
@@ -29,6 +31,8 @@ services:
     build:
       context: ./project/Admin
     env_file: .env
+    ports:
+      - "8081:8080"
     volumes:
       - resources:/app/resources
     depends_on:
