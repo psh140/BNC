@@ -67,6 +67,7 @@
 - [x] `nginx.conf` 작성
 - [x] `init.sql` 작성
 - [ ] 로컬 docker-compose up 테스트
+- [ ] **OAuth 키 발급 후 .env 수정** — 네이버/카카오 개발자 콘솔에서 키 발급, redirect URI를 `http://localhost/auth/naverLogin`, `http://localhost/auth/kakaoLogin`으로 등록
 
 ---
 
