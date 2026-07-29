@@ -1,7 +1,9 @@
 # BNC 프로젝트 작업 목록
 
-> Oracle + Windows 환경 → PostgreSQL + Docker + EC2(Linux) 전환 작업
-> 로컬(Mac) / Docker / EC2 어디서든 .env 파일만 바꾸면 동작하도록
+> Oracle + Windows 환경 → PostgreSQL + Docker 전환 작업
+> 어느 환경에서든 .env 파일만 바꾸면 동작하도록
+>
+> 실제 서버 배포는 하지 않는다. git 저장소로만 보관한다.
 
 ---
 
@@ -62,7 +64,7 @@
 
 ---
 
-## 6. 인프라 구성
+## 6. 인프라 구성 ✅
 
 - [x] `Bnc/Dockerfile` 작성
 - [x] `Admin/Dockerfile` 작성
@@ -75,7 +77,7 @@
 - [x] Admin `head.jsp` — 정적 리소스 경로 `/common/**` → `/admin/common/**` 전체 수정
 - [x] Admin `header.jsp` — 모든 nav 링크에 `/admin/` prefix 추가
 - [x] nginx `proxy_redirect` 동작 원리 확인 — `LoginInterceptor`는 `/auth/login` 유지 (nginx가 자동으로 `/admin/auth/login`으로 변환)
-- [ ] **OAuth 키 발급 후 .env 수정** — 사용할 제공자 미확정 (아래 6-2 참고)
+- [x] 소셜 로그인은 비활성 상태로 운영하기로 결정 → 6-2 / 6-3 참고
 
 ---
 
@@ -169,25 +171,25 @@
 
 ---
 
-## 8. EC2 배포
-
-- [ ] EC2 인스턴스 생성 (Ubuntu 22.04 LTS, t2.small 이상 권장)
-- [ ] EC2 보안 그룹 설정 (80, 443, 22 포트 개방 / 8080·8081·5432 외부 차단)
-- [ ] Docker + Docker Compose 설치
-- [ ] 코드 업로드 (git clone 또는 scp)
-- [ ] `.env` 파일 EC2에 직접 작성 (git에 포함 안 됨)
-- [ ] `docker-compose up -d` 실행
-- [ ] 네이버/카카오 개발자 콘솔에서 새 앱 등록 + 콜백 URL을 EC2 IP로 등록
-
----
-
 ## 참고 사항
 
 - Java 8 빌드는 Docker 내부에서 처리 → 로컬 Java 버전(11) 무관
 - 파일 업로드 경로: `FILE_ROOT_PATH` 환경변수 → `/app/resources` (Docker 기본값)
 - Bnc(사용자앱): 포트 8080 / Admin(관리자): 포트 8081 → Nginx가 앞단에서 라우팅
-- 도메인 없이 EC2 IP로도 동작 가능 (HTTPS는 도메인 확보 후 추가)
 - `.env` 파일은 절대 git에 올리지 말 것
+
+### 실행 방법
+
+```bash
+docker compose up -d --build     # 전체 기동
+docker compose down              # 중지 (볼륨 유지)
+docker compose down -v           # 중지 + DB 볼륨 삭제 (init.sql 재실행됨)
+```
+
+접속 : 메인 `http://localhost/` · 관리자 `http://localhost/admin/`
+
+> 앱 컨테이너만 재생성한 경우 nginx 도 함께 재시작해야 한다 (`docker compose restart nginx`).
+> 이유는 TROUBLESHOOTING.md 참고.
 
 ---
 
@@ -196,7 +198,7 @@
 > 프로젝트 완성 후 README에 옮길 것
 
 1. **라이선스/비용** — Oracle은 상용 라이선스. PostgreSQL은 완전 무료 오픈소스.
-2. **Docker 이미지 크기** — Oracle XE ~2GB vs PostgreSQL ~200MB. EC2 소형 인스턴스에서 Tomcat 2개 + Nginx와 함께 실행해야 하므로 메모리 부담이 큼.
+2. **Docker 이미지 크기** — Oracle XE ~2GB vs PostgreSQL ~200MB. Tomcat 2개 + Nginx와 한 머신에서 함께 띄워야 하므로 차이가 크게 체감됨.
 3. **Maven 의존성** — ojdbc6이 Maven Central에 없어 별도 리포지토리 설정 필요. PostgreSQL은 의존성 한 줄로 해결.
 4. **클라우드 친화성** — AWS RDS 등 클라우드 서비스에서 네이티브 지원. 현업 채택률도 높음.
 5. **쿼리 변환 최소화** — Oracle 전용 문법(sysdate, ROWNUM, CONNECT BY 등)만 표준 SQL로 교체. 비즈니스 로직은 그대로 유지.

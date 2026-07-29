@@ -190,7 +190,7 @@ docker compose restart bnc-app
 docker logs bncsource-bnc-app-1 2>&1 | grep -i "exception\|startup failed"
 ```
 
-### EC2 배포 시 고려사항
-- 서비스에 `restart: unless-stopped` 추가 → 인스턴스 재부팅 후 자동 복구
-- 위 문제는 재시작으로 해결되지만, 자동 재시작만으로는 순서 문제가 남을 수 있음.
+### 재발 방지 아이디어 (미적용)
+- 서비스에 `restart: unless-stopped` 추가 → 머신 재부팅 후 자동 복구
+- 다만 자동 재시작만으로는 기동 순서 문제가 남을 수 있음.
   근본적으로는 앱 쪽에서 DB 커넥션 획득을 재시도하도록 하는 것이 안전함
