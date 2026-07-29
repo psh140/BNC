@@ -1,11 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+	계약서 관련 쿼리 모음.
+
+	[cntr_flag — 계약 체결 상태]
+	  'N' : 발주사(req)가 계약서를 작성하고 서명한 상태. 아직 체결 전이다.
+	  'Y' : 수주사(acp)까지 서명을 마쳐 체결이 완료된 상태.
+
+	[상태 흐름]
+	  발주사 작성   → insertReqContractData : cntr_flag = 'N' 으로 신규 생성
+	  발주사 재작성 → updateReqContractData : 'N' 으로 되돌리고 수주사 서명을 지운다
+	  수주사 서명   → updateAcpContractData : 'N' → 'Y' 로 바뀌며 체결 완료
+
+	  즉 'Y'는 수주사 서명으로만 만들어지고, 발주사가 내용을 고치면 다시 'N'으로 돌아간다.
+
+	[req / acp 접두어]  req = 발주(요청)사, acp = 수주(수락)사
+-->
 <mapper namespace="com.bnc.mapper.ContractMapper">
 
+	<!-- cntr_contents 는 계약 본문(HTML)이라 길이가 길어 명시적으로 매핑한다 -->
 	<resultMap type="com.bnc.domain.ContractDTO" id="ContractDTO">
 		<result property="cntr_contents" column="cntr_contents" jdbcType="VARCHAR" javaType="java.lang.String"/>
 	</resultMap>
 
+	<!-- 해당 프로젝트에 계약서가 이미 있는지 판단용. 0이면 신규 작성, 1 이상이면 수정 경로를 탄다. -->
 	<select id="selectContractCount" resultType="int">
 		SELECT COUNT(*) FROM bnc_contract
 		WHERE cntr_proj_number = #{proj_number}
@@ -36,6 +54,11 @@
 		WHERE cntr_proj_number = #{proj_number}
 	</select>
 
+	<!--
+		발주사가 계약서를 처음 작성할 때. cntr_flag 는 'N'(체결 전)으로 고정 삽입한다.
+		수주사 서명 컬럼(cntr_acp_sign_path / cntr_acp_ceo_name)은 아직 값이 없어 넣지 않는다.
+		날짜는 'YYYYMMDDHH24MISS' 문자열로 저장한다 (기존 데이터 형식을 그대로 따름).
+	-->
 	<insert id="insertReqContractData">
 		INSERT INTO bnc_contract
 		(
@@ -64,6 +87,13 @@
 		)
 	</insert>
 
+	<!--
+		발주사가 계약 내용을 다시 작성할 때.
+
+		핵심은 마지막 두 줄이다 — 수주사 서명을 null 로 지우고 cntr_flag 를 'N' 으로 되돌린다.
+		내용이 바뀐 계약서에 이전 서명이 그대로 남아 체결된 것처럼 보이는 상황을 막기 위한 것으로,
+		수주사는 바뀐 내용을 보고 다시 서명해야 한다.
+	-->
 	<update id="updateReqContractData">
 		UPDATE bnc_contract SET
 
@@ -82,6 +112,10 @@
 		WHERE cntr_proj_number = #{cntr_proj_number}
 	</update>
 
+	<!--
+		수주사가 서명할 때. 여기서만 cntr_flag 가 'Y'(체결 완료)가 된다.
+		계약 내용(금액·기간·본문)은 건드리지 않고 서명 정보만 채운다.
+	-->
 	<update id="updateAcpContractData">
 		UPDATE bnc_contract SET
 
@@ -106,6 +140,11 @@
 	</delete>
 
 
+	<!--
+		아래 3개는 개별 계약서가 아니라 기업별 '계약서 양식(템플릿)'을 다룬다.
+		bnc_contract(실제 계약) 과는 별개 테이블(bnc_contract_company)이니 혼동하지 말 것.
+		발주사가 계약서를 쓸 때 자기 회사 양식을 기본값으로 불러오는 용도다.
+	-->
 	<insert id="insertContractCompanyData">
 		INSERT INTO bnc_contract_company
 		(

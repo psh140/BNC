@@ -1,7 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+	프로젝트 관련 쿼리 모음.
+
+	[페이지네이션 쿼리 구조]
+	목록 조회는 아래 3중 구조로 되어 있다. 바깥에서 안쪽 순서로 읽으면 된다.
+
+	  SELECT * FROM (                                   ③ sub  : 잘라낸 결과
+	      SELECT ROW_NUMBER() OVER(...) AS rnum, list.*  ② rnum : 정렬된 행에 1부터 번호를 매김
+	      FROM ( ... 실제 조회 + 검색조건 ... ) list      ① list : 조건에 맞는 전체 결과
+	  ) sub
+	  WHERE rnum 초과 startRowNumber, rnum 이하 endRowNumber
+
+	rnum 범위는 (startRowNumber, endRowNumber] — 시작값은 제외, 끝값은 포함이다.
+	두 값은 Criteria 가 계산한다. 1페이지면 (0, 10] 이 되어 1~10번 행이 나온다.
+
+	원래 Oracle 의 ROWNUM 을 쓰던 코드로, PostgreSQL 전환 시 ROW_NUMBER() OVER() 로 바꿨다.
+	LIMIT/OFFSET 으로 단순화할 수도 있지만 Java 쪽 Criteria 를 함께 고쳐야 해서 구조를 유지했다.
+
+	[주의] 검색 조건의 ${searchType} 은 #{} 가 아니라 ${} 라서 값이 SQL 에 그대로 박힌다.
+	       컬럼명을 동적으로 넣기 위한 것이지만 외부 입력이 그대로 들어오면 SQL 인젝션이 되므로,
+	       searchType 은 반드시 화면에서 고른 정해진 값만 전달되어야 한다.
+-->
 <mapper namespace="com.bnc.mapper.ProjectMapper">
 
+	<!--
+		내 회사가 발주(req) 또는 수주(acp)한 프로젝트의 전체 건수.
+		목록 쿼리(selectMyProjectList)와 검색 조건이 정확히 같아야 페이지 수가 어긋나지 않는다.
+	-->
 	<select id="selectMyProjectListCount" parameterType="hashmap" resultType="int">
 		<![CDATA[
 		SELECT count(*) FROM bnc_project
@@ -14,6 +40,7 @@
 		</choose>
 	</select>
 
+	<!-- 내 회사 프로젝트 목록 (페이지 단위). 구조 설명은 파일 상단 주석 참고. -->
 	<select id="selectMyProjectList" parameterType="hashmap" resultType="com.bnc.domain.ProjectVO">
 		SELECT * FROM (
 			SELECT ROW_NUMBER() OVER(ORDER BY proj_number DESC) AS rnum, list.* FROM (
@@ -32,6 +59,7 @@
 		<![CDATA[WHERE rnum > #{pageData.startRowNumber} AND rnum <= #{pageData.endRowNumber}]]>
 	</select>
 
+	<!-- 전체 프로젝트 건수 (모집 목록용). 위 selectMyProjectListCount 와 달리 회사 조건이 없다. -->
 	<select id="selectProjectListCount" resultType="int">
 		<![CDATA[
 		SELECT count(*) FROM bnc_project
@@ -43,6 +71,7 @@
 		</choose>
 	</select>
 
+	<!-- 전체 프로젝트 목록 (페이지 단위). 구조 설명은 파일 상단 주석 참고. -->
 	<select id="selectProjectList" resultType="com.bnc.domain.ProjectVO">
 		SELECT * FROM (
 			SELECT ROW_NUMBER() OVER(ORDER BY proj_number DESC) AS rnum, list.* FROM (

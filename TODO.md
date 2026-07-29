@@ -140,17 +140,32 @@
 
 ---
 
-## 7. 주석 작업 (복잡하거나 중요한 부분)
+## 7. 주석 작업 (복잡하거나 중요한 부분) ✅
 
-- [ ] `Criteria.java` — 페이지네이션 계산 로직
-- [ ] `ProjectServiceImpl.java` — 프로젝트 등록/수정 트랜잭션 흐름, 파일 업로드 처리 로직
-- [ ] `ProjectServiceImpl.updateProjectWorkingProcess()` — 프로젝트 상태 전이 로직
-- [ ] `AuthController.java` — 회원가입/기업정보 등록 흐름
-- [ ] `ContractMapper.xml` — 계약서 상태 흐름 (N→Y 등 flag 의미)
-- [ ] `NaverLoginConn.java` / `KakaoLoginConn.java` — OAuth 인증 흐름
-- [ ] `ProjectMapper.xml` — 페이지네이션 쿼리 구조
-- [ ] `ChartMapper.xml` — 통계 쿼리 로직 (월별 집계, TOP-N 등)
-- [ ] `root-context.xml` — DB 연결 구조, 환경변수 연동 방식
+- [x] `Criteria.java` — 페이지네이션 계산 로직 (Bnc/Admin 양쪽)
+  - 페이지/블럭 개념, 생성자의 setter 호출 순서 의존성, SQL rnum 과의 대응 관계
+  - 미사용 필드 `prevPage`/`nextPage` 와 `setNextPage()` 의 대입 오류를 주석으로 표시
+- [x] `ProjectServiceImpl.java` — 프로젝트 등록/수정 트랜잭션 흐름, 파일 업로드 처리 로직
+  - 등록은 proj_number(PK) 때문에 INSERT 순서에 제약이 있음을 명시
+  - 수정의 첨부파일은 "화면에 남은 것만 유지" 방식임을 설명
+  - @Transactional 이 디스크 파일까지 롤백하지 못한다는 점 기록
+- [x] `ProjectServiceImpl.updateProjectWorkingProcess()` — 프로젝트 상태 전이 로직
+  - 양측 플래그가 일치할 때만 전이 (Y+Y→종료 E / C+C→철회 W), 불일치 시 대기
+- [x] `AuthController.java` — 회원가입/기업정보 등록 흐름
+  - 별도 가입 폼 없이 약관 동의 화면이 곧 가입 단계라는 점, 회원 ID 접두어 규칙
+- [x] `ContractMapper.xml` — 계약서 상태 흐름 (N→Y 등 flag 의미)
+  - 발주사 재작성 시 수주사 서명을 지우고 'N' 으로 되돌리는 이유 설명
+- [x] `NaverLoginConn.java` / `KakaoLoginConn.java` — OAuth 인증 흐름
+  - state(CSRF 방지) 용도, 두 제공자의 구현 차이, 카카오 이메일 동의항목 주의사항
+- [x] `ProjectMapper.xml` — 페이지네이션 쿼리 구조
+  - 3중 서브쿼리 구조와 rnum 범위, `${searchType}` 의 SQL 인젝션 주의점
+- [x] `ChartMapper.xml` — 통계 쿼리 로직 (월별 집계, TOP-N 등)
+  - generate_series + LEFT JOIN 으로 빈 달을 0으로 채우는 이유
+- [x] `root-context.xml` — DB 연결 구조, 환경변수 연동 방식 (Bnc/Admin 양쪽)
+  - HikariCP fail-fast 때문에 DB 미기동 시 전체 404 가 되는 연결고리 설명
+
+> 검증 : 두 앱 재빌드 후 Bnc 3개·Admin 6개 페이지 200 확인.
+> 변경분 9개 파일 전부 "주석만 변경, 코드 동일"을 기계적으로 대조해 확인함.
 
 ---
 

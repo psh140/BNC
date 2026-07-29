@@ -36,6 +36,26 @@ import com.github.scribejava.core.model.OAuth2AccessToken;
 
 import lombok.extern.log4j.Log4j;
 
+/*
+ * 로그인 / 회원가입 / 마이페이지(기업정보·서명·탈퇴)를 담당하는 컨트롤러.
+ *
+ * [회원가입 흐름 — 별도의 가입 폼이 없다]
+ *   1. /auth/login            소셜 로그인 버튼 노출
+ *   2. 네이버/카카오 인증 후 /auth/naverLogin 또는 /auth/kakaoLogin 으로 콜백
+ *   3. 제공자에서 받은 id 로 기존 회원인지 확인
+ *        기존 회원  → 세션에 memb_id 를 넣고 메인으로 (로그인 완료)
+ *        신규 회원  → /auth/login/agreement 로 보내 약관 동의를 받은 뒤 그 시점에 INSERT
+ *      즉 약관 동의 화면이 곧 회원가입 단계다.
+ *
+ * [회원 ID 규칙]  "naver_" 또는 "kakao_" + 제공자가 준 고유 id.
+ *                 접두어가 있어 서로 다른 제공자의 id 가 겹치지 않는다.
+ *
+ * [로그인 판정]  세션의 memb_id 존재 여부로만 판단한다. 마이페이지 계열 메서드들이
+ *                각자 null 검사를 반복하는 이유다.
+ *
+ * [기업정보 등록]  회원가입과는 별개 단계다. 프로젝트를 발주/수주하려면 기업정보가 있어야 하므로
+ *                  마이페이지에서 사업자등록증·CI 이미지를 올려 따로 등록한다.
+ */
 @Log4j
 @Controller
 @RequestMapping("/auth")
@@ -78,6 +98,11 @@ public class AuthController {
 		return "/auth/login";
 	}
 
+	/*
+	 * 약관 동의 화면 = 신규 회원의 가입 단계.
+	 * 소셜 로그인 콜백이 RedirectAttributes 로 넘긴 member 정보가 flash attribute 로 들어와
+	 * 화면의 hidden 필드에 실린다. 화면에 뿌릴 약관 본문은 DB 에서 읽어온다 (P:개인정보, T:이용약관).
+	 */
 	/*개인정보처리방침-이용약관 */
 	@RequestMapping(value = "/login/agreement", method = RequestMethod.GET)
 	public String loginAgreement(MemberVO member, TermsVO terms, HttpServletRequest request, Model model) {
@@ -90,6 +115,10 @@ public class AuthController {
 		return "/auth/login/agreement";
 	}
 
+	/*
+	 * 동의 완료 → 여기서 실제 회원 INSERT 가 일어난다. 세션에 memb_id 를 넣어 곧바로 로그인 상태가 된다.
+	 * 별도의 가입 폼이 없으므로 이 메서드가 회원가입의 마지막 단계다.
+	 */
 	@RequestMapping(value = "/login/agreement/process", method = RequestMethod.POST)
 	public String loginAgreementProcess(MemberVO member, HttpServletRequest request, Model model) {
 		System.out.println("Agreement Process");
@@ -142,11 +171,13 @@ public class AuthController {
 		String memb_id = id;
 		boolean stat = service.selectMember(memb_id);
 
+		//기존 회원이면 바로 로그인, 신규면 약관 동의(=가입) 화면으로 보낸다
 		if (stat) {
 			session.setAttribute("memb_id", member.getMemb_id());
 			service.insertMemberLog(memberlog);
 			return "redirect:/";
 		} else {
+			//리다이렉트 후에도 값이 유지되도록 flash attribute 로 넘긴다
 			rttr.addFlashAttribute("member", member);
 			return "redirect:/auth/login/agreement";
 		}
@@ -235,6 +266,12 @@ public class AuthController {
 		return "/auth/mypage/companyInfo/write";
 	}
 
+	/*
+	 * 기업정보 등록. 사업자등록증 사본과 CI 이미지 두 파일을 함께 올린다.
+	 *
+	 * 업로드 경로는 UtilConfig 의 환경변수 값(FILE_ROOT_PATH)에 화면에서 넘어온 하위 경로를 붙여 만든다.
+	 * 이 메서드에는 @Transactional 이 없어 파일 업로드 후 INSERT 가 실패하면 파일만 남는다.
+	 */
 	@RequestMapping(value = "/mypage/companyInfo/write/process", method = RequestMethod.POST)
 	public String companyInfoWirte(CompanyVO company, HttpServletRequest request, Model model) throws Exception {
 		System.out.println("CompanyInfo Insert Process");

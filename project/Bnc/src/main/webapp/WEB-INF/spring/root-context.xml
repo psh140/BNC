@@ -14,7 +14,15 @@
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
 	
 	<!-- Root Context: defines shared resources visible to all other web components -->
-		
+
+	<!--
+		DB 접속 정보 — 하드코딩하지 않고 #{systemEnvironment['...']} 로 OS 환경변수에서 읽는다.
+		이 덕분에 로컬 / Docker / EC2 어디서든 코드 수정 없이 .env 값만 바꾸면 된다.
+		값은 docker-compose.yml 의 `env_file: .env` 를 통해 컨테이너에 주입된다.
+
+		주의 : 환경변수가 비어 있으면 null 이 들어가 기동 시점에 연결이 실패한다.
+		       (원인이 드러나는 위치가 아래 dataSource 이므로 로그만 보면 헷갈리기 쉽다)
+	-->
 	<!-- Database Connection -->
 	<bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
 		<property name="driverClassName" value="org.postgresql.Driver"></property>
@@ -22,30 +30,50 @@
 		<property name="username" value="#{systemEnvironment['DB_USERNAME']}"></property>
 		<property name="password" value="#{systemEnvironment['DB_PASSWORD']}"></property>
 	</bean>
-	
-	
+
+
+	<!--
+		커넥션 풀. HikariCP 는 생성 시점에 커넥션을 미리 확보(fail-fast)하므로
+		DB 가 아직 안 떠 있으면 여기서 예외가 나고 Spring 컨텍스트 초기화가 통째로 실패한다.
+		→ Tomcat 은 살아 있는데 앱만 배포되지 않아 모든 요청이 404 가 되는 증상으로 나타난다.
+		(TROUBLESHOOTING.md "앱 컨테이너 단독 재시작 시 DB 연결 실패" 참고)
+
+		destroy-method="close" : 컨텍스트 종료 시 풀의 커넥션을 정리한다.
+	-->
 	<!-- Database Close -->
 	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
 		<constructor-arg ref="hikariConfig"/>
 	</bean>
-	
+
+	<!-- MyBatis 세션 팩토리. 타입 별칭/핸들러 등 세부 설정은 mybatis-config.xml 에 있다. -->
 	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 		<property name="dataSource" ref="dataSource"></property>
 		<property name="configLocation" value="/WEB-INF/spring/mybatis-config.xml"></property>
 	</bean>
-	
+
+	<!-- @Transactional 이 실제로 동작하게 해주는 트랜잭션 매니저 (아래 tx:annotation-driven 과 한 쌍) -->
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 		<property name="dataSource" ref="dataSource"/>
 	</bean>
+	<!--
+		과거 Windows 개발 환경의 업로드 경로. 지금은 UtilConfig 가 FILE_ROOT_PATH 환경변수로 처리하므로
+		이 bean 은 사용하지 않는다.
+	-->
 	<!-- bean id="uploadPath" class="java.lang.String">
-		<constructor-arg value="D:\\project\\resources" /> 
+		<constructor-arg value="D:\\project\\resources" />
 	</bean-->
+
+	<!-- @Transactional 어노테이션 활성화 -->
 	<tx:annotation-driven/>
 
-
-	
+	<!-- Mapper 인터페이스(com.bnc.mapper)를 스캔해 구현체를 자동 생성 — XML 매퍼와 이름으로 연결된다 -->
 	<mybatis-spring:scan base-package="com.bnc.mapper"/>
+
+	<!--
+		서비스 계층만 스캔한다. Controller 는 servlet-context.xml 이 따로 스캔하므로
+		여기서 같이 스캔하면 빈이 두 번 등록된다.
+	-->
 	<context:component-scan base-package="com.bnc.service"/>
-	
+
 	<aop:aspectj-autoproxy/>
 </beans>

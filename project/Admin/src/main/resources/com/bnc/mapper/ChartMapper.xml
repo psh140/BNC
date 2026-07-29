@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+	관리자 대시보드(chart/view)의 통계 쿼리 모음.
+
+	[프로젝트 상태값 proj_flag]  W:모집중 / C:협의중 / P:진행중 / E:종료
+	[계약 상태값 cntr_flag]      N:발주사만 서명(체결 전) / Y:수주사까지 서명 완료(체결됨)
+
+	Oracle → PostgreSQL 전환 시 이 파일이 가장 많이 바뀌었다.
+	DECODE→CASE WHEN, NVL→COALESCE, CONNECT BY LEVEL→generate_series(), ROWNUM TOP-N→LIMIT.
+-->
 <mapper namespace="com.bnc.mapper.ChartMapper">
+	<!--
+		프로젝트 상태별 건수를 한 행으로 집계한다 (원형 차트용).
+		상태별로 따로 COUNT 쿼리를 4번 날리는 대신, CASE WHEN 으로 조건에 맞을 때만 1을 남기고
+		COUNT 가 NULL 을 세지 않는 성질을 이용해 한 번의 스캔으로 끝낸다.
+	-->
 	<select id="readProjFlag" resultType="com.bnc.domain.ChartVO">
 		select
 			count(CASE WHEN p.proj_flag = 'W' THEN 1 END) as proj_flag_w,
@@ -10,6 +24,16 @@
 		from bnc_project p
 	</select>
 
+	<!--
+		월별 신규 회원 수 (꺾은선 차트용).
+
+		가입자가 한 명도 없는 달은 GROUP BY 결과에 아예 나오지 않아 그래프가 끊긴다.
+		그래서 generate_series() 로 criteriaMonth ~ curMonth 사이의 모든 달을 먼저 만들어 두고(dt),
+		실제 집계 결과(mc)를 LEFT JOIN 한 뒤 COALESCE 로 빈 달을 0으로 채운다.
+		→ 조회 구간의 모든 달이 빠짐없이 나온다.
+
+		memb_rdate 는 'YYYYMMDDHH24MISS' 형식의 문자열이라 앞 6자리를 잘라 'YYYYMM' 으로 맞춘다.
+	-->
 	<select id="readForMonthMember" resultType="com.bnc.domain.ChartVO">
 		SELECT rdate as memb_rdate, COALESCE(cnt, 0) cnt FROM (
 			SELECT TO_CHAR(s, 'YYYYMM') AS rdate
@@ -28,6 +52,11 @@
 		ORDER BY rdate DESC
 	</select>
 
+	<!--
+		발주 건수 1위 기업 (TOP-N). 종료(E)된 프로젝트만 대상으로 집계한 뒤
+		건수 내림차순 정렬 후 LIMIT 1 로 1위만 가져온다.
+		동점이면 어느 쪽이 나올지 정해져 있지 않다.
+	-->
 	<select id="topReqCompanyRead" resultType="com.bnc.domain.ChartVO">
 		SELECT p.proj_req_biznum, cm.cmpy_company_name, count(*) as cnt, sum(ct.cntr_price) as totalPrice
 		FROM bnc_project p, bnc_contract ct, bnc_company cm
@@ -40,6 +69,7 @@
 		LIMIT 1
 	</select>
 
+	<!-- 수주 건수 1위 기업. 위 topReqCompanyRead 와 구조는 같고 기준 컬럼만 acp(수주)로 바뀐다. -->
 	<select id="topAcpCompanyRead" resultType="com.bnc.domain.ChartVO">
 		SELECT p.proj_acp_biznum, cm.cmpy_company_name, count(p.proj_number) as cnt, sum(ct.cntr_price) as totalPrice
 		FROM bnc_project p, bnc_contract ct, bnc_company cm
@@ -52,6 +82,7 @@
 		LIMIT 1
 	</select>
 
+	<!-- 종료된 프로젝트의 평균 계약금액. 원 단위로 떨어지도록 round 처리한다. -->
 	<select id="endProjectAvgPrice" resultType="int">
 		<![CDATA[
 		select round(avg(c.cntr_price)) as avg from bnc_contract c, bnc_project p
@@ -77,6 +108,7 @@
 		]]>
 	</select>
 
+	<!-- 계약금액이 가장 큰 프로젝트 1건. 체결된 계약(cntr_flag='Y')만 대상으로 한다. -->
 	<select id="topProjectPriceInfo" resultType="com.bnc.domain.ChartVO">
 		SELECT p.proj_number, p.proj_name, p.proj_req_biznum, p.proj_acp_biznum, c.cntr_price
 		FROM bnc_project p, bnc_contract c
@@ -85,6 +117,11 @@
 		LIMIT 1
 	</select>
 
+	<!--
+		체결된 계약(cntr_flag='Y')의 누적 거래액.
+		위 endProjectAvgPrice 는 프로젝트 종료(proj_flag='E') 기준이고 이쪽은 계약 체결 기준이라
+		모수가 서로 다르다.
+	-->
 	<select id="endProjectPriceTotal" resultType="int">
 		<![CDATA[
 		select sum(cntr_price) total

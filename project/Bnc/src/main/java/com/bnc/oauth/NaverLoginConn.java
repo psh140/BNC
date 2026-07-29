@@ -15,6 +15,22 @@ import com.github.scribejava.core.model.Response;
 import com.github.scribejava.core.model.Verb;
 import com.github.scribejava.core.oauth.OAuth20Service;
 
+/*
+ * 네이버 소셜 로그인 연동. ScribeJava 라이브러리로 OAuth 2.0 인가 코드 방식을 처리한다.
+ *
+ * [전체 흐름]
+ *   1. getAuthorizationUrl()  : 로그인 화면에 걸 네이버 인증 URL 생성 (state 난수를 세션에 저장)
+ *   2. 사용자가 네이버에서 로그인/동의
+ *   3. 네이버가 N_REDIRECT_URI(/auth/naverLogin)로 code + state 를 붙여 되돌려 보냄
+ *   4. getAccessToken()       : state 를 검증하고 code 를 액세스 토큰으로 교환
+ *   5. getUserProfile()       : 토큰으로 프로필 API 를 호출해 id/email 획득
+ *   → 이후 AuthController 가 id 로 기존 회원 여부를 판단해 로그인 또는 약관 동의 화면으로 보낸다.
+ *
+ * [state 파라미터] CSRF 방지용 난수. 인증 URL 을 만들 때 세션에 넣어두고 콜백에서 돌아온 값과
+ *                  비교한다. 공격자가 임의로 만든 콜백 요청은 세션의 값과 달라 걸러진다.
+ *
+ * 키가 발급되지 않았으면 OAuthConfig.isNaverEnabled() 가 false 라 이 클래스는 호출되지 않는다.
+ */
 public class NaverLoginConn {
 	/* 네이버 아이디로 인증  URL 생성  Method */
     public String getAuthorizationUrl(HttpSession session) {
@@ -39,6 +55,8 @@ public class NaverLoginConn {
     public OAuth2AccessToken getAccessToken(HttpSession session, String code, String state) throws IOException{
 
         /* Callback으로 전달받은 세선검증용 난수값과 세션에 저장되어있는 값이 일치하는지 확인 */
+        // 일치하지 않으면 아래 return null 로 빠진다. 호출부(AuthController)에서 null 체크를 하지 않으므로
+        // 이 경우 프로필 조회 단계에서 NPE 가 발생한다.
         String sessionState = getSession(session);
         if(StringUtils.pathEquals(sessionState, state)){
 
