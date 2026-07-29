@@ -75,7 +75,27 @@
 - [x] Admin `head.jsp` — 정적 리소스 경로 `/common/**` → `/admin/common/**` 전체 수정
 - [x] Admin `header.jsp` — 모든 nav 링크에 `/admin/` prefix 추가
 - [x] nginx `proxy_redirect` 동작 원리 확인 — `LoginInterceptor`는 `/auth/login` 유지 (nginx가 자동으로 `/admin/auth/login`으로 변환)
-- [ ] **OAuth 키 발급 후 .env 수정** — 네이버/카카오 개발자 콘솔에서 키 발급, redirect URI를 `http://localhost/auth/naverLogin`, `http://localhost/auth/kakaoLogin`으로 등록
+- [ ] **OAuth 키 발급 후 .env 수정** — 사용할 제공자 미확정 (아래 6-2 참고)
+
+---
+
+## 6-2. 사용자 직접 처리 항목 (보류 중)
+
+> 코드 작업이 아니라 외부 콘솔/계정에서 발급받아야 하는 값들.
+
+- [ ] **메일 발송 계정 재발급 후 `.env`에 `MAIL_USERNAME` / `MAIL_PASSWORD` 추가** — *사용자가 나중에 직접 처리*
+  - 현재 `.env`에 두 값이 없음 → Admin의 **회원 승인 메일 발송이 동작하지 않는 상태**
+  - 사용처: `Admin/servlet-context.xml:62-63`, `Admin/MemberController.java:150`
+  - `docker-compose.yml`은 `env_file: .env`로 주입하므로 `.env`에 넣기만 하면 됨 (compose 수정 불필요)
+  - 배경: 기존 Gmail 계정 비밀번호가 공개 저장소에 노출되어 제거함 → **기존 값 재사용 금지**,
+    새 계정이나 새 앱 비밀번호를 발급할 것
+
+- [ ] **소셜 로그인 제공자 확정 후 키 발급** — *제공자 미확정 상태*
+  - 현재 코드는 **네이버/카카오**로 구현되어 있음 (`Bnc/oauth/NaverLoginConn.java`,
+    `NaverLoginApi.java`, `KakaoLoginConn.java`, `config/OAuthConfig.java`)
+  - 네이버/카카오를 그대로 쓸 경우: 개발자 콘솔에서 키 발급 후 redirect URI를
+    `http://localhost/auth/naverLogin`, `http://localhost/auth/kakaoLogin`으로 등록
+  - 다른 제공자로 교체할 경우: 위 클래스들과 `.env.example`, `login.jsp` 버튼까지 함께 수정 필요
 
 ---
 
