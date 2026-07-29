@@ -171,6 +171,26 @@
 
 ---
 
+## 8. README 작성 ← 다음 작업
+
+> 저장소를 처음 보는 사람이 프로젝트를 파악하고 직접 띄워볼 수 있는 수준으로 작성.
+> 현재 저장소 루트의 `readme.txt.txt` 는 2020년 원본 파일이므로 정리 대상.
+
+- [ ] 프로젝트 소개 — 어떤 서비스인지, 사용자앱(Bnc)과 관리자앱(Admin) 구성
+- [ ] 기술 스택 — Spring MVC 5.2 / MyBatis / PostgreSQL 16 / Tomcat 9 / Java 8 / Docker / Nginx
+- [ ] 아키텍처 — Nginx 가 앞단에서 `/` → Bnc, `/admin/` → Admin 으로 라우팅하는 구조 (다이어그램)
+- [ ] 실행 방법 — `.env.example` 복사 → `docker compose up -d --build` → 접속 경로
+- [ ] Oracle + Windows → PostgreSQL + Docker 전환 작업 정리
+  - **아래 "README 작성용 메모" 5개 항목을 여기로 옮길 것**
+  - 주요 변환 내역 : `sysdate`→`NOW()`, `ROWNUM`→`ROW_NUMBER() OVER()`,
+    `DECODE`→`CASE WHEN`, `NVL`→`COALESCE`, `CONNECT BY LEVEL`→`generate_series()`
+  - 전환 과정에서 발견해 고친 기존 버그 (NoticeMapper WHERE 절, ContractMapper 태그 오용 등)
+- [ ] 환경변수 표 — `.env.example` 기준으로 각 항목의 용도 정리
+- [ ] 소셜 로그인이 비활성 상태이며 키만 넣으면 동작한다는 점 명시
+- [ ] 기존 `readme.txt.txt` 삭제 또는 내용 흡수
+
+---
+
 ## 참고 사항
 
 - Java 8 빌드는 Docker 내부에서 처리 → 로컬 Java 버전(11) 무관
