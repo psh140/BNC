@@ -147,7 +147,7 @@ public class MemberController {
 			@Override 
 			public void prepare(MimeMessage mimeMessage) throws Exception { 
 				final MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8"); 
-				helper.setFrom("user2@example.com"); // 관리자 아이디
+				helper.setFrom(System.getenv("MAIL_USERNAME")); // 관리자 아이디
 //				helper.setTo(memberService.read(memb_id).getMemb_email());
 				helper.setTo(memberService.read(memb_id).getMemb_email());
 				helper.setSubject(mail.getMalf_title()); 
