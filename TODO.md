@@ -90,12 +90,31 @@
   - 배경: 기존 Gmail 계정 비밀번호가 공개 저장소에 노출되어 제거함 → **기존 값 재사용 금지**,
     새 계정이나 새 앱 비밀번호를 발급할 것
 
-- [ ] **소셜 로그인 제공자 확정 후 키 발급** — *제공자 미확정 상태*
-  - 현재 코드는 **네이버/카카오**로 구현되어 있음 (`Bnc/oauth/NaverLoginConn.java`,
-    `NaverLoginApi.java`, `KakaoLoginConn.java`, `config/OAuthConfig.java`)
-  - 네이버/카카오를 그대로 쓸 경우: 개발자 콘솔에서 키 발급 후 redirect URI를
-    `http://localhost/auth/naverLogin`, `http://localhost/auth/kakaoLogin`으로 등록
-  - 다른 제공자로 교체할 경우: 위 클래스들과 `.env.example`, `login.jsp` 버튼까지 함께 수정 필요
+- [ ] **네이버/카카오 키 발급** — *당분간 비활성 운영, 필요해지면 그때 발급* ✅ 코드 준비 완료
+  - 결정: 소셜 로그인 코드는 **그대로 남겨두고 비활성 상태로 운영**. 나중에 키만 넣으면 즉시 동작.
+  - 켜는 방법 (**코드 수정 불필요**):
+    1. 네이버/카카오 개발자 콘솔에서 앱 등록 후 키 발급
+    2. 콘솔의 Callback URL을 `.env`의 `*_REDIRECT_URI`와 동일하게 등록
+    3. `.env`에 값 채우고 `docker compose up -d --force-recreate bnc-app` + `docker compose restart nginx`
+  - 제공자별 독립 — 한쪽만 켜도 됨
+    (네이버는 `CLIENT_ID`/`CLIENT_SECRET`/`REDIRECT_URI` 3개, 카카오는 `CLIENT_ID`/`REDIRECT_URI` 2개 필요)
+
+---
+
+## 6-3. 소셜 로그인 비활성화 처리 ✅
+
+> 키 미발급 상태에서 로그인 화면에 네이버/카카오 버튼이 그대로 노출되고 있었음.
+> `.env`에 `.env.example` 예시값(`your_naver_client_id`)이 그대로 들어 있어서
+> 버튼을 누르면 제공자 쪽 에러 페이지로 넘어가는 상태였음.
+
+- [x] `OAuthConfig.java` — `isNaverEnabled()` / `isKakaoEnabled()` 추가
+  - 필요한 환경변수가 전부 채워졌을 때만 활성. null·공백·`your_` 예시값은 미설정으로 취급
+- [x] `AuthController.login()` — 비활성 제공자는 인증 URL 자체를 생성하지 않음
+- [x] `AuthController` 콜백 2개 — 비활성 상태에서 직접 접근 시 `/auth/login`으로 리다이렉트
+- [x] `login.jsp` — `<c:if>`로 버튼 조건부 노출, 둘 다 꺼지면 안내 문구 표시
+- [x] `.env` 예시값 제거(빈 값), `.env.example`에 켜는 방법 주석 추가
+- [x] 검증 — 비활성/네이버만/양쪽 3가지 상태 전환 확인, 콜백 직접 접근 302 확인
+  - 코드 재빌드 없이 `.env` 값 + 컨테이너 재생성만으로 전환되는 것 확인함
 
 ---
 

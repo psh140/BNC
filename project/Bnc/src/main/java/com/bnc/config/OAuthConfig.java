@@ -20,4 +20,32 @@ public class OAuthConfig {
     public final static String K_REDIRECT_URI = System.getenv("KAKAO_REDIRECT_URI");
     /* 프로필 조회 API URL */
     public final static String K_PROFILE_API_URL = "https://kapi.kakao.com/v2/user/me";
+
+    /*
+     * 소셜 로그인 활성화 여부.
+     *
+     * 키를 발급받지 않은 상태에서도 앱이 정상 동작하도록, 필요한 환경변수가 모두 채워져 있을 때만
+     * 각 제공자를 활성화한다. 비활성 상태에서는 로그인 화면의 버튼이 숨겨지고 콜백 URL도 막힌다.
+     * 나중에 키를 발급받으면 .env 값만 채우고 컨테이너를 재시작하면 되고, 코드 수정은 필요 없다.
+     */
+    public static boolean isNaverEnabled() {
+        return isConfigured(N_CLIENT_ID, N_CLIENT_SECRET, N_REDIRECT_URI);
+    }
+
+    public static boolean isKakaoEnabled() {
+        return isConfigured(K_CLIENT_ID, K_REDIRECT_URI);
+    }
+
+    /*
+     * 환경변수가 실제로 채워졌는지 검사.
+     * .env.example을 그대로 복사해 쓰는 경우를 대비해 `your_`로 시작하는 예시값도 미설정으로 취급한다.
+     */
+    private static boolean isConfigured(String... values) {
+        for (String value : values) {
+            if (value == null || value.trim().isEmpty() || value.trim().startsWith("your_")) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.bnc.config.OAuthConfig;
 import com.bnc.config.UtilConfig;
 import com.bnc.domain.BizCategoryVO;
 import com.bnc.domain.CompanyVO;
@@ -56,13 +57,24 @@ public class AuthController {
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public String login(HttpServletRequest request, Model model) {
 		HttpSession session = request.getSession();
-		
-		String naverUrl = naverLoginConn.getAuthorizationUrl(session);
-		String kakaoUrl = kakaoLoginConn.getAuthorizationUrl(session);
 
-		model.addAttribute("naver_url", naverUrl);
-		model.addAttribute("kakao_url", kakaoUrl);
-		
+		/*
+		 * 키가 발급되지 않은 제공자는 인증 URL을 만들지 않는다.
+		 * 만들어봤자 client_id가 빈 값이라 제공자 쪽에서 에러 페이지만 뜨기 때문.
+		 */
+		boolean naverEnabled = OAuthConfig.isNaverEnabled();
+		boolean kakaoEnabled = OAuthConfig.isKakaoEnabled();
+
+		if (naverEnabled) {
+			model.addAttribute("naver_url", naverLoginConn.getAuthorizationUrl(session));
+		}
+		if (kakaoEnabled) {
+			model.addAttribute("kakao_url", kakaoLoginConn.getAuthorizationUrl(session));
+		}
+
+		model.addAttribute("naver_enabled", naverEnabled);
+		model.addAttribute("kakao_enabled", kakaoEnabled);
+
 		return "/auth/login";
 	}
 
@@ -92,6 +104,11 @@ public class AuthController {
 	@RequestMapping(value = "/naverLogin", method = RequestMethod.GET)
 	public String naverLogin(Model model, @RequestParam String code, @RequestParam String state,
 		HttpServletRequest request, RedirectAttributes rttr) throws IOException, ParseException {
+		/* 키 미발급 상태에서 콜백 URL로 직접 접근하는 경우 차단 */
+		if (!OAuthConfig.isNaverEnabled()) {
+			return "redirect:/auth/login";
+		}
+
 		MemberVO member = new MemberVO();
 		MemberLogVO memberlog = new MemberLogVO();
 		String kind = "naver";
@@ -137,6 +154,11 @@ public class AuthController {
 
 	@RequestMapping("/kakaoLogin")
 	public String kakaoLogin(Model model, @RequestParam("code") String code, HttpServletRequest request, RedirectAttributes rttr) {
+		/* 키 미발급 상태에서 콜백 URL로 직접 접근하는 경우 차단 */
+		if (!OAuthConfig.isKakaoEnabled()) {
+			return "redirect:/auth/login";
+		}
+
 		String access_Token = kakaoLoginConn.getAccessToken(code);
 		HashMap<String, Object> userInfo = kakaoLoginConn.getUserInfo(access_Token);
 		HttpSession session = request.getSession();

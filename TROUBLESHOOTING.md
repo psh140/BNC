@@ -132,3 +132,65 @@ Admin 앱 내부 코드(Controller, Interceptor)에서는 `/admin/` prefix 없�
 nginx의 `proxy_redirect / /admin/;`가 응답 헤더의 Location 값에 자동으로 prefix를 붙여준다.
 단, JSP의 `href`/`src` 속성(HTML에 직접 렌더링되는 경로)은 `/admin/` prefix를 명시해야 한다.
 → Location 헤더는 nginx가 처리, HTML 내 링크는 직접 처리.
+
+---
+
+## [2026-07-29] 컨테이너 재생성 후 nginx 502
+
+### 증상
+`docker compose up -d --build bnc-app`으로 앱만 재빌드한 뒤 `http://localhost/`가 502.
+`http://localhost:8080/`(컨테이너 직결)은 200으로 정상.
+
+### 원인
+nginx는 `proxy_pass http://bnc-app:8080`의 호스트명을 **기동 시점에 한 번만 DNS 해석해서 캐싱**한다.
+컨테이너를 재생성하면 도커 네트워크에서 새 IP를 받는데, nginx는 옛 IP로 계속 프록시해서 502가 난다.
+
+### 해결
+앱 컨테이너를 재생성했으면 nginx도 같이 재시작한다.
+
+```bash
+docker compose up -d --force-recreate bnc-app
+docker compose restart nginx
+```
+
+### 참고
+`docker compose up -d`로 전체를 올릴 때는 nginx도 함께 뜨므로 문제가 없다.
+개별 서비스만 만졌을 때 발생한다.
+
+---
+
+## [2026-07-29] 앱 컨테이너 단독 재시작 시 DB 연결 실패
+
+### 증상
+모든 페이지가 404. 로그에 `java.net.UnknownHostException: postgres` →
+`HikariPool$PoolInitializationException` → `Context [] startup failed`.
+Tomcat 자체는 떠 있어서 컨테이너 상태는 `Up`으로 보인다.
+
+### 원인
+postgres보다 앱 컨테이너가 먼저 기동되면 `postgres` 호스트명을 해석하지 못한다.
+HikariCP는 기동 시점에 커넥션을 미리 확보(fail-fast)하므로 여기서 실패하면
+Spring 컨텍스트 초기화가 통째로 실패하고, 앱이 배포되지 않은 채 Tomcat만 살아있게 된다.
+→ 컨테이너는 `Up`인데 전부 404가 나는 상태.
+
+`docker-compose.yml`의 `depends_on: condition: service_healthy`는
+`docker compose up` 경로에서만 적용된다. 도커 데스크톱 재시작이나 개별 컨테이너 재시작으로
+컨테이너가 살아날 때는 순서가 보장되지 않는다.
+
+### 해결
+앱 컨테이너를 재시작한다.
+
+```bash
+docker compose restart bnc-app
+```
+
+### 확인
+컨테이너가 `Up`인데 404가 나면 반드시 로그부터 확인할 것. 상태만으로는 알 수 없다.
+
+```bash
+docker logs bncsource-bnc-app-1 2>&1 | grep -i "exception\|startup failed"
+```
+
+### EC2 배포 시 고려사항
+- 서비스에 `restart: unless-stopped` 추가 → 인스턴스 재부팅 후 자동 복구
+- 위 문제는 재시작으로 해결되지만, 자동 재시작만으로는 순서 문제가 남을 수 있음.
+  근본적으로는 앱 쪽에서 DB 커넥션 획득을 재시도하도록 하는 것이 안전함
