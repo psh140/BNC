@@ -17,7 +17,7 @@
 					<tr>
 						<td rowspan="4" style="width: 200px; height: 200px; border:1px solid black;">
 							<c:if test="${empty company.cmpy_ci_file_path}">
-								<img alt="" src="/common/image/ci_thumb_default.jpg" width=200px; height=200px;/>
+								<img alt="" src="/admin/common/image/ci_thumb_default.jpg" width=200px; height=200px;/>
 							</c:if>
 							<c:if test="${not empty company.cmpy_ci_file_path}">
 								<img alt="" src="${company.cmpy_ci_file_path}" width=200px; height=200px;/>

@@ -52,7 +52,7 @@
 	nhn.husky.EZCreator.createInIFrame({
 	    oAppRef: oEditors,
 	    elPlaceHolder: "doct_form",
-	    sSkinURI: "/common/editor/SmartEditor2Skin.html",
+	    sSkinURI: "/admin/common/editor/SmartEditor2Skin.html",
 	    fCreator: "createSEditor2"
 	});
 </script>

@@ -18,7 +18,7 @@
 								<option value="memb_email" <c:if test="${srch == 'proj_kind'}">selected</c:if>>이메일</option>
 							</select>
 							<input type="text" name="keyword" value="<c:if test="${keyword != ''}">${keyword}</c:if>">
-							<a href="javascript:void(0);" onclick="searchSubmit();"><img class="search-btn-img" src="/common/image/icon_search.png"></a>
+							<a href="javascript:void(0);" onclick="searchSubmit();"><img class="search-btn-img" src="/admin/common/image/icon_search.png"></a>
 						</form>
 					</div>
 				</div>

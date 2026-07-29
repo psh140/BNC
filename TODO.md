@@ -79,15 +79,25 @@
 
 ---
 
-## 6-1. Admin JSP 정적 리소스 경로 전수조사
+## 6-1. Admin JSP 정적 리소스 경로 전수조사 ✅
 
 > `head.jsp` / `header.jsp`는 수정 완료. 그러나 각 페이지별 JSP 파일에서도
 > `/common/` 절대경로를 직접 사용하는 경우가 있음 → nginx가 Bnc 앱으로 잘못 라우팅됨.
 > 발견된 사례: `member/list.jsp`의 `src="/common/image/icon_search.png"`
 
-- [ ] `Admin` 프로젝트 전체 JSP 파일에서 `/common/` 경로 grep
-- [ ] 발견된 모든 경로를 `/admin/common/`으로 수정
-- [ ] docker-compose up 후 각 페이지 정상 렌더링 확인
+- [x] `Admin` 프로젝트 전체 JSP 파일에서 `/common/` 경로 grep — 13개 파일 13건 발견
+  - 검색 아이콘 5건: `member/list`, `document/list`, `notice/list`, `project/list`, `company/list`
+  - 이미지 2건: `member/modify`(thumb_add), `company/view`(ci_thumb_default)
+  - 스마트에디터 스킨 `sSkinURI` 6건: `notice/write`·`notice/modify`, `document/write`·`document/modify`,
+    `terms/termsAndConditions/modify`, `terms/privacyPolicy/modify`
+- [x] 발견된 모든 경로를 `/admin/common/`으로 수정
+  - `<%@ include file="../common/..." %>`(JSP 컴파일 시점 상대경로)와
+    `chart/view.jsp`의 `src="../common/..."`(브라우저 상대경로)는 정상 동작 → 수정 대상 아님
+  - JS/CSS 파일에는 절대경로 `/common/` 참조 없음 확인
+- [x] docker-compose 재빌드 후 각 페이지 정상 렌더링 확인
+  - 정적 리소스 4종 200 확인 (수정 전 `/common/image/icon_search.png`는 404였음)
+  - 관리자 로그인 후 12개 페이지 전부 200, 렌더된 HTML에 `/common/` 잔존 0건
+  - `terms/*/modify`는 `?pol_kind=P|T` 파라미터 필수 (없으면 400 — 정상 동작)
 
 ---
 

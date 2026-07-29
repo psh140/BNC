@@ -18,7 +18,7 @@
 								<option value="bizc_name" <c:if test="${srch == 'bizc_name'}">selected</c:if>>업종</option>
 							</select>
 							<input type="text" name="keyword" value="<c:if test="${keyword != ''}">${keyword}</c:if>">
-							<a class="search-btn" href="javascript:void(0);" onclick="searchSubmit();"><img class="search-btn-img" src="/common/image/icon_search.png"></a>
+							<a class="search-btn" href="javascript:void(0);" onclick="searchSubmit();"><img class="search-btn-img" src="/admin/common/image/icon_search.png"></a>
 						</form>
 					</div>
 				</div>

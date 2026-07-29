@@ -34,7 +34,7 @@
 									<div class="image-field">
 										<img id="cmpy_Bizdoc_file" src="${member.cmpy_biz_doc_file_path}">
 										<span class="file-img-btn" onclick="fileBtnClick(this);">
-											<img src="/common/image/thumb_add.png">
+											<img src="/admin/common/image/thumb_add.png">
 										</span>
 										<input class="input-file-hidden" type="file" name="cmpy_bizdoc_file" id="cmpy_bizdoc_file"/>
 									</div>

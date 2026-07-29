@@ -20,7 +20,7 @@
 								<option value="proj_name" <c:if test="${srch == 'proj_name'}">selected</c:if>>프로젝트명</option>
 							</select>
 							<input type="text" name="keyword" value="<c:if test="${keyword != ''}">${keyword}</c:if>" placeholder="예: 제작, 견적, 컨설팅">
-							<a href="javascript:void(0);" onclick="searchSubmit();"><img class="search-btn-img" src="/common/image/icon_search.png"></a>
+							<a href="javascript:void(0);" onclick="searchSubmit();"><img class="search-btn-img" src="/admin/common/image/icon_search.png"></a>
 						</form>
 					</div>
 				</div>

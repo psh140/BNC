@@ -19,7 +19,7 @@
 								<option value="doct_name" <c:if test="${srch == 'doct_name'}">selected</c:if>>문서이름</option>
 							</select>
 							<input type="text" name="keyword" value="<c:if test="${keyword != ''}">${keyword}</c:if>">
-							<a href="javascript:void(0);" onclick="searchSubmit();"><img class="search-btn-img" src="/common/image/icon_search.png"></a>
+							<a href="javascript:void(0);" onclick="searchSubmit();"><img class="search-btn-img" src="/admin/common/image/icon_search.png"></a>
 						</form>
 					</div>
 				</div>
