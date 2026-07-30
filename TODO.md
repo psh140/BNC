@@ -24,6 +24,10 @@
 - [x] `Admin/root-context.xml` — 동일
 - [x] `Bnc/OAuthConfig.java` — 네이버/카카오 키, 리다이렉트 URI → `System.getenv()`
 - [x] `.env.example` 파일 작성
+- [x] `Admin/OAuthConfig.java` — **이 단계에서 누락됐던 파일** (2026-07-30 처리)
+  - Bnc 를 복사해 Admin 을 만들 때 딸려온 파일로 네이버/카카오 키가 하드코딩된 채 남아 있었음
+  - Admin 에서 참조하는 코드 0건, OAuth 연동 클래스도 없음 → 환경변수 외부화 대신 삭제
+  - 히스토리에 남아 있던 키·Oracle 접속정보도 `git filter-repo` 로 함께 제거함
 
 ---
 
