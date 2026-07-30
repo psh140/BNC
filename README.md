@@ -78,15 +78,17 @@ docker compose down -v   # 중지 + DB 볼륨 삭제 → 다음 기동 때 init.
 
 ---
 
-<!--
-  TODO: 스크린샷 확보 후 이 자리에 "## 화면" 절을 넣을 것.
-        아래 4장을 촬영해 docs/screenshots/ 에 저장하고 이미지로 삽입한다.
-          docs/screenshots/01-main.png          메인 화면
-          docs/screenshots/02-project-list.png  프로젝트 목록 / 상세
-          docs/screenshots/03-contract.png      전자계약 작성 화면
-          docs/screenshots/04-admin-chart.png   관리자 통계 대시보드
-        (이미지가 없는 동안 빈 절이 보이지 않도록 헤딩째 주석 처리해 둔다)
--->
+## 화면
+
+| 메인 | 모집 프로젝트 목록 |
+|---|---|
+| ![메인 화면](docs/screenshots/01-main.jpg) | ![프로젝트 목록](docs/screenshots/02-project-list.jpg) |
+| **전자계약 (관리자 화면)** | **관리자 통계** |
+| ![계약서](docs/screenshots/03-contract.jpg) | ![통계 대시보드](docs/screenshots/04-admin-chart.jpg) |
+
+썸네일과 서명란의 이미지는 플레이스홀더다. 2020년에 업로드된 원본 파일은 저장소에 포함되어 있지 않다.
+
+---
 
 ## 아키텍처
 
@@ -205,6 +207,14 @@ DB 접속정보·파일 경로·OAuth 키·SMTP 계정은 전부 환경변수로
 - **회원 승인 메일이 발송되지 않는다.** `MAIL_USERNAME` / `MAIL_PASSWORD`가 비어 있다. Gmail 앱 비밀번호를 발급받아 `.env`에 넣으면 동작한다. 그 외 관리자 기능은 정상이다.
 - **관리자 비밀번호가 평문으로 저장·비교된다.** 원본 구현을 그대로 유지한 부분이다. 로컬 실행을 전제로 한 저장소라 손대지 않았으나, 실제 서비스라면 해싱이 선행되어야 한다.
 - **파일 업로드는 트랜잭션 롤백 대상이 아니다.** `@Transactional`이 DB만 되돌리므로 INSERT 실패 시 디스크에 파일만 남는다. 원본 구조를 유지했다.
+- **시드 데이터의 업로드 파일이 없어 이미지가 깨져 보인다.** `sql/init.sql`에는 파일 경로만 들어 있고 2020년에 업로드된 실제 이미지는 저장소에 포함하지 않았다. 화면을 채워서 보려면 시드 데이터가 참조하는 경로에 임의의 이미지를 넣으면 된다.
+
+  ```bash
+  # 참조 경로 목록 확인
+  docker compose exec postgres psql -U "$DB_USERNAME" -d bnc -t -A \
+    -c "SELECT proj_thumb_file_path FROM bnc_project WHERE proj_thumb_file_path LIKE '/resources/%'"
+  ```
+- **사용자앱의 상세 화면은 로그인이 필요하다.** 프로젝트 상세·매칭·계약 화면은 회원 세션과 승인된 기업정보를 요구하므로, 소셜 로그인 키가 없으면 접근할 수 없다. 같은 데이터는 관리자 화면(`/admin/project/view`)에서 계약 내용까지 확인할 수 있다.
 
 ---
 
